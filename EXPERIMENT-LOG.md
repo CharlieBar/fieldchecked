@@ -57,61 +57,77 @@ Each of these becomes a series of log entries rather than a single one.
 
 ## Verification queue
 
-The 12 draft pages, ranked by the commercial intent of their target query. Work
-the queue top-down: high-intent pages generate Search Console signal fastest, so
-they should be the first content indexed. **Do not reorder this list for
-convenience** — the ordering is the experiment. Promote at most 2–3 per week (see
-the release procedure in `CLAUDE.md`), each in its own commit, each logged below.
+Ranked by the commercial intent of the target query. Work top-down; promote at
+most 2–3 per week (see the release procedure in `CLAUDE.md`), each in its own
+commit, each logged in the promotion table below. **Do not reorder for
+convenience** — the ordering is the experiment.
+
+Re-ranked 2026-08-12 after the hardware record was corrected and the phantom
+rows retargeted. Every remaining `pending-verification` row now names a GPU in
+the inventory, so every page below is verifiable with hardware on hand — which
+was not true of the previous queue.
 
 ### Tier 1 — high-intent buying decisions
 
-| # | Page | Target query | What unblocks it | Hardware needed |
+| # | Page | Target query | Rows to measure | Hardware |
 |---|---|---|---|---|
-| 1 | `/guides/best-gpu-for-local-llm-inference-2026/` | best gpu for local llm inference 2026 | Verify the tier table's price and capacity claims; the throughput figures it cites live on the pages below | none (cites others) |
-| 2 | `/vs/rtx-4080-super-vs-rtx-3090/` | rtx 4080 super vs rtx 3090 | Depends on #4 and #5 measurements | 4080 Super + 3090 |
-| 3 | `/vs/rtx-5070-ti-vs-rtx-3090/` | rtx 5070 ti vs rtx 3090 | Depends on #5 and #6 measurements | 5070 Ti + 3090 |
-| 4 | `/reviews/rtx-4080-super-local-llm/` | rtx 4080 super local llm | 3 rows on the rig | **owned — verifiable today** |
-| 5 | `/reviews/rtx-3090-used-local-llm/` | used rtx 3090 local llm | 3 rows | 3090 (not owned) |
-| 6 | `/reviews/rtx-5070-ti-local-ai/` | rtx 5070 ti local ai | 3 rows | 5070 Ti (not owned) |
+| 1 | `/guides/best-gpu-for-local-llm-inference-2026/` | best gpu for local llm inference 2026 | none of its own; cites the pages below | — |
+| 2 | `/vs/rtx-4070-ti-super-vs-rtx-4060/` | rtx 4070 ti super vs rtx 4060 | 3 | 4070 Ti Super + 4060 |
+| 3 | `/vs/rtx-4080-super-vs-rtx-4070-ti-super/` | rtx 4080 super vs 4070 ti super | 4 | 4080 Super + 4070 Ti Super |
+| 4 | `/reviews/rtx-4060-local-llm/` | rtx 4060 local llm | 3 | 4060 |
+| 5 | `/reviews/rtx-4070-ti-super-local-ai/` | rtx 4070 ti super local llm | 3 | 4070 Ti Super |
+| 6 | `/reviews/rtx-4080-super-local-llm/` | rtx 4080 super local llm | 3 | 4080 Super |
 
 ### Tier 2 — mid-intent research
 
-The brief's tier 2 was "mid-intent guides", but the only draft guide is a
-buying guide, which belongs in tier 1. The mid-intent band is occupied by the
+The brief's tier 2 was "mid-intent guides", but the only draft guide is a buying
+guide, which belongs in tier 1. The mid-intent band is occupied by the
 `/verdict/` pages instead — "is X worth it" and "[product] reddit" are research
-queries that precede a purchase. **Flagging this as an interpretation**, not a
-silent reorder.
+queries that precede a purchase. **Flagged as an interpretation, not a silent
+reorder** — confirmed as correct in handoff #2 and retained.
 
-| # | Page | Target query | What unblocks it | Hardware needed |
-|---|---|---|---|---|
-| 7 | `/verdict/is-the-rtx-3090-still-worth-it/` | is rtx 3090 still worth it reddit | Replace 4 landing-page sources with deep links to specific threads | **none — no rig time** |
-| 8 | `/verdict/rtx-5080-local-ai-reddit/` | rtx 5080 local ai reddit | Same: 4 real thread links | **none — no rig time** |
-| 9 | `/verdict/strix-halo-128gb-local-llm/` | strix halo local llm | Same: 4 real thread links | **none — no rig time** |
+These need no rig time at all. They are blocked on replacing landing-page
+sources with deep links to specific threads, which is reading work.
+
+| # | Page | Target query | Blocked on |
+|---|---|---|---|
+| 7 | `/verdict/is-the-rtx-3090-still-worth-it/` | is rtx 3090 still worth it reddit | 4 real thread links |
+| 8 | `/verdict/rtx-5080-local-ai-reddit/` | rtx 5080 local ai reddit | 4 real thread links |
+| 9 | `/verdict/strix-halo-128gb-local-llm/` | strix halo local llm | 4 real thread links |
+
+These three cover hardware we do not own, which is legitimate: a `/verdict/`
+page is explicitly community synthesis, not our measurement. That separation is
+why they survived the retargeting unchanged.
 
 ### Tier 3 — long-tail model-specific benchmarks
 
-| # | Page | Target query | What unblocks it | Hardware needed |
+| # | Page | Target query | Rows to measure | Hardware |
 |---|---|---|---|---|
-| 10 | `/benchmarks/qwen3-14b/` | qwen3 14b tokens per second | 5 rows; 2 are 4080 Super | partial — 2/5 owned |
-| 11 | `/benchmarks/gemma-3-27b/` | gemma 3 27b benchmark | 4 rows; 1 is 4080 Super | partial — 1/4 owned |
-| 12 | `/benchmarks/llama-3-3-70b/` | llama 3.3 70b tokens per second | 4 rows; 2 need a dual-3090 rig | partial — 1/4 owned |
+| 10 | `/benchmarks/qwen3-14b/` | qwen3 14b tokens per second | 5 | all three |
+| 11 | `/benchmarks/gemma-3-27b/` | gemma 3 27b benchmark | 3 | all three |
+| 12 | `/benchmarks/llama-3-3-70b/` | llama 3.3 70b tokens per second | 3 | all three |
 
-### Blockers found while building this queue
+### Vertical B — not in the queue above
 
-**The seed content assumes a hardware fleet we do not have.** Pending rows claim
-measurements on four configurations — RTX 4080 Super 16GB, RTX 3090 24GB,
-RTX 3090 24GB ×2, and RTX 5070 Ti 16GB — while the rig documented on `/about/`
-is a single RTX 4080 Super with multi-GPU expansion in progress. Only the
-4080 Super rows can ever be marked `measured` as things stand. For the rest the
-options are: buy or borrow the hardware, re-tag the rows `community-reported`
-with a linked source, or delete them. **Do not leave them pending indefinitely** —
-a permanently-draft page is a page that never enters the experiment.
+`/builds/`, `/studio/` and `/experiments/` are gated on artifacts rather than
+rig time, so they do not compete for the same resource and are sequenced
+separately:
 
-**Consequence for ordering:** the fastest page to fully verify is #4 (owned
-hardware) and the three cheapest are #7–#9 (no rig time at all, just source
-collection). Intent ordering says publish #1–#3 first, but #1–#3 depend on
-measurements from #4–#6. The queue above is left in intent order as instructed;
-the practical first move is #4, which unblocks #2 and contributes to #1.
+- `/builds/wordpress-mcp-server-claude-code/` — needs the repo published and the
+  edit transcript captured.
+- `/studio/comfyui-infographic-pipeline/` — needs at least one real sample asset
+  committed under `/public`. The validator blocks publication until the file
+  exists.
+- `/experiments/faq-schema-ai-citations/` — a structural placeholder. Cannot be
+  published until this site has Search Console data, which requires the Vertical A
+  pages to be indexed first. It is deliberately last.
+
+### Practical sequencing note
+
+Intent order says publish #1–#3 first, but #1–#3 restate measurements that live
+on #4–#6. One measurement session per card produces rows for its review, both
+comparisons it appears in, and all three benchmark pages — so the *measurement*
+work groups by hardware while the *publication* order stays intent-ranked.
 
 ---
 
@@ -129,6 +145,48 @@ Copy this row for each change:
 | 2026-08-12 | Robots is permissive to AI crawlers. | Citation by AI assistants is the thing being measured; blocking the crawlers that produce citations would remove the variable. | Referral traffic and citation appearances from assistant surfaces. | _pending_ |
 | 2026-08-12 | Canonical origin set to `https://fieldchecked.netlify.app`; brand and origin consolidated behind a single `BRAND` constant in `site.ts`, enforced by a CI guard. | A domain move later should be a one-line edit, not a grep-and-pray. | No functional metric — verified by the guard, which fails the build if either value is duplicated anywhere else. | n/a — structural |
 | 2026-08-12 | Publish cadence capped at 3 pages per release, enforced in CI (`scripts/lib/release-guards.mjs`). | A 12-URL index burst would make it impossible to attribute a ranking change to any single page, destroying the first experiment cycle. Staggered release doubles as the cadence-vs-indexing-speed test. | Time from merge to first impression, per page. With staggered releases this is measurable per URL; with a burst it is not. | _pending_ |
+
+### Hardware record correction — 2026-08-12
+
+`/about/` documented a single RTX 4080 Super. The real inventory is three cards:
+**RTX 4080 Super 16GB, RTX 4070 Ti Super 16GB, RTX 4060 8GB**. That list now
+lives in `site.hardwareInventory` in `site.ts`, is rendered on `/about/` from
+that same array, and is enforced: a `pending-verification` row naming a GPU
+outside it fails the build.
+
+Twenty-two pending rows claimed measurements on hardware that was never going to
+exist. Disposition of every one:
+
+| Was | Rows | Action | Now |
+|---|---|---|---|
+| RTX 5070 Ti 16GB | 4 | **Retargeted** | RTX 4070 Ti Super 16GB |
+| RTX 3090 24GB | 4 | **Retargeted** | RTX 4080 Super / 4070 Ti Super / 4060 |
+| RTX 3090 24GB ×2 | 4 | **Deleted** | — no multi-GPU rig exists |
+| RTX 4080 Super 16GB | 10 | Kept | unchanged |
+
+Two review pages and two comparison pages were about cards we do not own, so
+retargeting rows alone would have left the surrounding copy incoherent. They
+were rewritten onto owned hardware and their URLs changed:
+
+| Old URL | New URL |
+|---|---|
+| `/reviews/rtx-3090-used-local-llm/` | `/reviews/rtx-4060-local-llm/` |
+| `/reviews/rtx-5070-ti-local-ai/` | `/reviews/rtx-4070-ti-super-local-ai/` |
+| `/vs/rtx-4080-super-vs-rtx-3090/` | `/vs/rtx-4080-super-vs-rtx-4070-ti-super/` |
+| `/vs/rtx-5070-ti-vs-rtx-3090/` | `/vs/rtx-4070-ti-super-vs-rtx-4060/` |
+
+No redirects are needed: all four were `draft`/noindex and never indexed.
+
+**Why the multi-GPU rows were deleted rather than retagged.** The alternative
+was `community-reported` with a deep-link source. Producing a real deep link
+requires reading real threads, and inventing one to satisfy the rule would be
+precisely the failure the rule exists to prevent. Deleting is the honest option;
+the rows can return as `community-reported` when someone has actually sourced
+them.
+
+The three cards form a ladder — 8GB, then two 16GB cards at different bandwidth —
+which maps onto the highest-intent query in the queue. That is a better spine for
+the content than the original scattered lineup, and it is fully verifiable.
 
 ### Promotion log
 

@@ -29,15 +29,22 @@ export const aboutPage: StaticPage = {
       ],
     },
     {
+      type: 'prose',
+      heading: 'The hardware',
+      body: [
+        'Three GPUs are available for testing, and they are chosen to be a ladder rather than a collection: an 8GB card, and two 16GB cards at different memory bandwidth. That covers the decision most people are actually making — how much VRAM do I need, and does the faster card matter once capacity is settled.',
+        'The list below is generated from the same record the build validator reads. If a benchmark row on this site names a GPU that is not on this list, the build fails. That is deliberate: it makes "we planned to measure something on hardware we do not have" impossible to ship rather than something you have to take on trust.',
+      ],
+    },
+    {
       type: 'specs',
-      heading: 'The rig',
+      heading: 'The rest of the rig',
       items: [
-        { label: 'GPU', value: 'NVIDIA RTX 4080 Super 16GB' },
         { label: 'CPU', value: 'AMD Ryzen 9 7950X' },
         { label: 'System RAM', value: '64 GB DDR5-6000' },
         { label: 'OS', value: 'Windows 11 + WSL2 (Ubuntu 24.04)' },
         { label: 'Primary runtime', value: 'llama.cpp' },
-        { label: 'Status', value: 'Multi-GPU expansion in progress' },
+        { label: 'Multi-GPU', value: 'Not available — no dual-card results are published' },
       ],
     },
     {

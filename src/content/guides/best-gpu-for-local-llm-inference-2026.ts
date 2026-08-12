@@ -3,6 +3,7 @@ import type { GuideContent } from '@/types/content';
 export const guide: GuideContent = {
   slug: 'best-gpu-for-local-llm-inference-2026',
   status: 'draft',
+  vertical: 'A',
   datePublished: '2026-08-12',
   difficulty: 'beginner',
   timeEstimate: '10 min read',
@@ -206,12 +207,12 @@ export const guide: GuideContent = {
       {
         name: 'Used 24GB card — best overall for local LLM inference',
         description: '27B-class models at full speed, and a two-card path to 70B.',
-        url: '/reviews/rtx-3090-used-local-llm/',
+        url: '/reviews/rtx-4070-ti-super-local-ai/',
       },
       {
         name: '16GB current-generation card — best for speed within the envelope',
         description: 'Fastest option for 14B-class models, with a warranty and lower power draw.',
-        url: '/reviews/rtx-5070-ti-local-ai/',
+        url: '/reviews/rtx-4080-super-local-llm/',
       },
       {
         name: 'Dual 24GB configuration — entry point for 70B models',
@@ -222,7 +223,7 @@ export const guide: GuideContent = {
   },
 
   related: [
-    '/vs/rtx-4080-super-vs-rtx-3090/',
+    '/vs/rtx-4080-super-vs-rtx-4070-ti-super/',
     '/guides/multi-gpu-setup-for-local-ai/',
     '/blog/vram-is-still-the-bottleneck/',
   ],

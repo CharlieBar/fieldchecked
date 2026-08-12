@@ -20,6 +20,7 @@
  * type stripping erases the import entirely and the module is self-contained.
  */
 import { readdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import {
@@ -32,10 +33,23 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const CONTENT_DIR = path.join(ROOT, 'src', 'content');
 
 /** Collections that carry published articles, keyed by URL segment. */
-const COLLECTIONS = ['reviews', 'vs', 'guides', 'benchmarks', 'verdict', 'blog'];
+const COLLECTIONS = [
+  'reviews', 'vs', 'guides', 'benchmarks', 'verdict', 'blog',
+  'builds', 'studio', 'experiments',
+];
+
+/** Which vertical each URL pattern belongs to, for the tagging check. */
+const VERTICAL_OF = {
+  reviews: 'A', vs: 'A', benchmarks: 'A', verdict: 'A',
+  builds: 'B', studio: 'B', experiments: 'B',
+  // /guides/ and /blog/ serve both verticals and are tagged per page.
+};
 
 /** Freshness cadence from §4 — how stale a page may get before we flag it. */
-const STALENESS_DAYS = { benchmarks: 14, vs: 14, reviews: 30, guides: 30, verdict: 30, blog: 90 };
+const STALENESS_DAYS = {
+  benchmarks: 14, vs: 14, reviews: 30, guides: 30, verdict: 30, blog: 90,
+  builds: 120, studio: 120, experiments: 120,
+};
 
 const MIN_FAQS = 8;
 const QUICK_ANSWER_MIN_WORDS = 80;
@@ -44,6 +58,25 @@ const MIN_SOURCES = 3;
 
 const errors = [];
 const warnings = [];
+
+/**
+ * The hardware record, read from the same file /about/ renders. Normalised so
+ * "NVIDIA RTX 4060 8GB" and "RTX 4060 8GB" compare equal, while a multi-GPU
+ * label like "RTX 4060 8GB x2" deliberately does not match any single card.
+ */
+const { site } = await import(
+  pathToFileURL(path.join(ROOT, 'src', 'content', 'global', 'site.ts')).href
+);
+
+function normaliseGpu(label) {
+  return String(label ?? '')
+    .toLowerCase()
+    .replace(/\bnvidia\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const INVENTORY = new Set(site.hardwareInventory.map((unit) => normaliseGpu(unit.label)));
 
 function fail(file, message) {
   errors.push({ file, message });
@@ -156,6 +189,44 @@ function checkStructure(file, collection, c) {
     fail(file, `status must be "draft" or "published" (got "${c.status}")`);
 }
 
+/**
+ * Free-text throughput in a comparison table is a provenance hole: a string
+ * cell carries no status, so an unverified number can reach a published page
+ * without any rule seeing it. Throughput belongs in a typed BenchmarkRow.
+ *
+ * This is an error at any status rather than only on published pages, because
+ * there is no legitimate reason to write a tokens/sec figure as free text —
+ * and catching it on the draft is what stops it reaching Checkpoint 3.
+ */
+const THROUGHPUT_PATTERN = /\d\s*(?:tok(?:ens)?\s*\/\s*s(?:ec)?|tokens?\s+per\s+second|t\/s)\b/i;
+
+function checkFreeTextThroughput(file, c) {
+  const tables = [];
+  if (c.comparisonTable?.rows) {
+    tables.push({ label: 'comparisonTable', rows: c.comparisonTable.rows });
+  }
+  for (const [index, section] of (c.sections ?? []).entries()) {
+    if (section.type === 'table' && section.rows) {
+      tables.push({ label: `sections[${index}]`, rows: section.rows });
+    }
+  }
+
+  for (const table of tables) {
+    for (const row of table.rows) {
+      for (const cell of row) {
+        if (typeof cell?.value === 'string' && THROUGHPUT_PATTERN.test(cell.value)) {
+          fail(
+            file,
+            `${table.label} cell "${cell.value}" states a throughput figure as free text. ` +
+              'A table cell carries no provenance — move it into a typed `benchmarks` ' +
+              'BenchmarkRow so it has a status the validator can check.',
+          );
+        }
+      }
+    }
+  }
+}
+
 /** Nothing carrying unverified figures may be marked published. */
 function checkProvenance(file, collection, c) {
   const rows = [...(c.rows ?? []), ...(c.benchmarks ?? [])];
@@ -175,6 +246,22 @@ function checkProvenance(file, collection, c) {
         file,
         `published page carries ${unverified.length} pending-verification row(s) — verify on the rig at Checkpoint 2 or keep it draft`,
       );
+  }
+
+  // A row we intend to measure must name hardware we actually have. Without
+  // this, a page can sit in `pending-verification` forever waiting on a card
+  // nobody owns — which is how the seed content ended up claiming results on
+  // an RTX 3090 and a dual-3090 rig that were never going to exist.
+  for (const row of rows) {
+    if (row.status !== 'pending-verification') continue;
+    if (!INVENTORY.has(normaliseGpu(row.gpu))) {
+      fail(
+        file,
+        `row "${row.gpu}" (${row.model}) is pending-verification but that GPU is not in the ` +
+          `hardware inventory in src/content/global/site.ts [${[...INVENTORY].join(', ')}]. ` +
+          'Retarget it onto owned hardware, retag it as community-reported with a source, or delete it.',
+      );
+    }
   }
 }
 
@@ -247,6 +334,95 @@ function checkCollectionRules(file, collection, c) {
   }
 }
 
+/**
+ * Vertical B rules. Each pillar has one thing that makes its posts verifiable
+ * rather than promotional, and each is required before publication:
+ *   builds      — an artifact, and stated limitations
+ *   studio      — a sample with an asset that exists on disk
+ *   experiments — a data point, a result, and caveats
+ */
+function checkVerticalB(file, collection, c) {
+  if (collection === 'builds') {
+    if (!Array.isArray(c.artifacts) || c.artifacts.length === 0)
+      fail(file, 'build pages require at least 1 artifact — a build post without one is a claim');
+    if (!Array.isArray(c.limitations) || c.limitations.length === 0)
+      fail(file, 'build pages require a non-empty `limitations` list — a build with no stated limitations is marketing, not a field report');
+
+    const labels = new Set((c.artifacts ?? []).map((a) => a.label));
+    for (const artifact of c.artifacts ?? []) {
+      if (!artifact.caption?.trim()) fail(file, `artifact "${artifact.label}" has no caption`);
+      if (artifact.url && !artifact.url.startsWith('https://'))
+        fail(file, `artifact "${artifact.label}" has a non-https URL`);
+    }
+
+    if (c.status === 'published') {
+      for (const result of c.results ?? []) {
+        if (result.provenance !== 'measured') continue;
+        if (!result.artifactLabel || !labels.has(result.artifactLabel))
+          fail(
+            file,
+            `result "${result.metric}" is marked measured but does not point at an artifact ` +
+              `(artifactLabel must be one of: ${[...labels].join(', ') || 'none defined'})`,
+          );
+      }
+    }
+  }
+
+  if (collection === 'studio') {
+    if (!Array.isArray(c.samples) || c.samples.length === 0) {
+      fail(file, 'studio pages require at least 1 sample — no pipeline described without output shown');
+      return;
+    }
+    for (const sample of c.samples) {
+      if (!sample.imagePath?.startsWith('/'))
+        fail(file, `sample "${sample.label}" needs a root-relative imagePath under /public`);
+      else if (c.status === 'published') {
+        // Only enforced at publish: a draft may reference an asset not yet produced.
+        const asset = path.join(ROOT, 'public', sample.imagePath.replace(/^\//, ''));
+        if (!existsSync(asset))
+          fail(
+            file,
+            `sample "${sample.label}" points at ${sample.imagePath} which does not exist in /public — ` +
+              'a published studio page must show real output',
+          );
+      }
+    }
+  }
+
+  if (collection === 'experiments') {
+    if (!['confirmed', 'refuted', 'inconclusive'].includes(c.result))
+      fail(file, `experiment result must be confirmed | refuted | inconclusive (got "${c.result}")`);
+    if (!Array.isArray(c.caveats) || c.caveats.length === 0)
+      fail(file, 'experiment pages require non-empty `caveats` — an n=1 result with no stated limits overclaims');
+
+    if (c.status === 'published') {
+      if (!Array.isArray(c.dataPoints) || c.dataPoints.length === 0)
+        fail(
+          file,
+          'published experiment pages require at least 1 dataPoint — publishing a conclusion ' +
+            'with no measurements behind it is the exact failure this pillar exists to avoid',
+        );
+      for (const point of c.dataPoints ?? []) {
+        if (typeof point.before !== 'number' || typeof point.after !== 'number')
+          fail(file, `dataPoint "${point.metric}" must have numeric before/after values`);
+        if (!['GSC', 'GA4', 'Plausible', 'manual-observation'].includes(point.source))
+          fail(file, `dataPoint "${point.metric}" has an unrecognised source "${point.source}"`);
+      }
+    }
+  }
+}
+
+/** Every page declares its vertical, and it must match its URL pattern. */
+function checkVertical(file, collection, c) {
+  if (!['A', 'B'].includes(c.vertical)) {
+    fail(file, `vertical must be "A" or "B" (got "${c.vertical}") — needed for per-vertical GSC attribution`);
+    return;
+  }
+  const expected = VERTICAL_OF[collection];
+  if (expected && c.vertical !== expected)
+    fail(file, `/${collection}/ is Vertical ${expected} but this page is tagged "${c.vertical}"`);
+}
+
 function checkLinks(file, c, canonicals) {
   for (const link of [...(c.related ?? []), ...(c.relatedReviews ?? [])]) {
     const normalized = link.endsWith('/') ? link : `${link}/`;
@@ -274,7 +450,10 @@ for (const { file, collection, content } of all) {
   checkSeo(file, collection, content);
   checkStructure(file, collection, content);
   checkProvenance(file, collection, content);
+  checkFreeTextThroughput(file, content);
   checkCollectionRules(file, collection, content);
+  checkVerticalB(file, collection, content);
+  checkVertical(file, collection, content);
   checkLinks(file, content, canonicals);
 
   const canonical = content.seo?.canonical;
@@ -292,8 +471,6 @@ const published = all.filter((entry) => entry.content.status === 'published').le
 
 const allowBulk =
   process.argv.includes('--allow-bulk-promotion') || process.env.ALLOW_BULK_PROMOTION === '1';
-
-const { site } = await import(pathToFileURL(path.join(ROOT, 'src', 'content', 'global', 'site.ts')).href);
 
 for (const problem of await checkSingleSourceOfTruth({ cwd: ROOT, site })) {
   fail(problem.file, problem.message);

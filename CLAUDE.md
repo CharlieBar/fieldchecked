@@ -67,6 +67,17 @@ stricter than the SEO rules and are not negotiable at all.
 
 - **Every numeric row carries a provenance status**: `measured`,
   `pending-verification`, `community-reported`, or `vendor-claimed`.
+- **Throughput figures live in typed `BenchmarkRow`s, never in table cells.**
+  A `TableCell` is a string and carries no provenance, so a free-text
+  "52 tok/s" in a `/vs/` or `/guides/` comparison table would reach a published
+  page without any rule seeing it. Comparison tables hold spec and price facts;
+  throughput goes in the page's `benchmarks` array and renders through the same
+  `BenchmarkTable`. The validator fails the build on free-text throughput at any
+  status — not just on published pages, because catching it on the draft is what
+  stops it reaching Checkpoint 3.
+- **A `pending-verification` row must name a GPU in `site.hardwareInventory`.**
+  Otherwise a page can sit unpublishable forever waiting on hardware nobody has.
+  Retarget it, retag it `community-reported` with a real source, or delete it.
 - **Only a human may mark something `measured`,** and only after reproducing it on
   the rig. No script and no model sets that value.
 - **A page with any `pending-verification` row may not be `published`.** Draft
@@ -140,6 +151,33 @@ for the override deliberately, not to get a red build green.
 The one automatic exemption is the initial launch: if the base branch contains no
 content pages at all, there is no prior state to attribute against, so the cap
 does not apply. That can only ever happen once.
+
+## The two verticals
+
+| Vertical | Pillars | Gated on |
+|---|---|---|
+| **A — local AI hardware** | `/reviews/` `/vs/` `/benchmarks/` `/verdict/` | rig time; hard-capped by three GPUs |
+| **B — AI tooling** | `/builds/` `/studio/` `/experiments/` | real artifacts; publishes continuously |
+
+`/guides/` and `/blog/` serve both and are tagged per page. Every content file
+declares `vertical`, and the validator checks it against the URL pattern.
+
+**Never evaluate the two in a single aggregate GSC number.** Two verticals on
+one domain makes attribution messier, and the strict URL-pattern separation
+exists precisely so per-pattern reporting is possible. Aggregating them throws
+that away.
+
+Each Vertical B pillar has one thing that makes its posts verifiable rather than
+promotional, enforced before publication:
+
+- **`/builds/`** — at least one artifact, non-empty `limitations`, and any
+  `measured` result must point at an artifact by label.
+- **`/studio/`** — at least one sample whose `imagePath` actually exists under
+  `/public`. No pipeline described without output shown.
+- **`/experiments/`** — at least one `dataPoint`, a `result`, and non-empty
+  `caveats`. `inconclusive` is a valid and expected outcome; publishing null
+  results is the credibility mechanism for the pillar, so never let the pipeline
+  reshape an inconclusive test into a confident claim.
 
 ## Working on design
 

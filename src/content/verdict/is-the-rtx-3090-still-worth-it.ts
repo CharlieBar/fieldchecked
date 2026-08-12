@@ -3,6 +3,7 @@ import type { VerdictContent } from '@/types/content';
 export const verdict: VerdictContent = {
   slug: 'is-the-rtx-3090-still-worth-it',
   status: 'draft',
+  vertical: 'A',
   datePublished: '2026-08-08',
 
   seo: {
@@ -176,8 +177,8 @@ export const verdict: VerdictContent = {
     about: [{ name: 'NVIDIA GeForce RTX 3090', type: 'Product' }],
   },
 
-  relatedReviews: ['/reviews/rtx-3090-used-local-llm/'],
-  related: ['/guides/multi-gpu-setup-for-local-ai/', '/vs/rtx-4080-super-vs-rtx-3090/'],
+  relatedReviews: ['/reviews/rtx-4070-ti-super-local-ai/'],
+  related: ['/guides/multi-gpu-setup-for-local-ai/', '/vs/rtx-4070-ti-super-vs-rtx-4060/'],
 };
 
 export default verdict;

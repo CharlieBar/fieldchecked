@@ -3,6 +3,7 @@ import type { VsContent } from '@/types/content';
 export const comparison: VsContent = {
   slug: 'ollama-vs-lm-studio',
   status: 'published',
+  vertical: 'A',
   datePublished: '2026-08-07',
   contenders: ['Ollama', 'LM Studio'],
 

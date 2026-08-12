@@ -3,6 +3,7 @@ import type { BlogContent } from '@/types/content';
 export const post: BlogContent = {
   slug: 'tokens-per-second-is-not-enough',
   status: 'published',
+  vertical: 'A',
   datePublished: '2026-08-09',
   category: 'opinion',
   readingTimeMinutes: 6,

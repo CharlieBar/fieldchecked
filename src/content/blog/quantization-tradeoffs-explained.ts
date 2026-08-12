@@ -3,6 +3,7 @@ import type { BlogContent } from '@/types/content';
 export const post: BlogContent = {
   slug: 'quantization-tradeoffs-explained',
   status: 'published',
+  vertical: 'A',
   datePublished: '2026-08-06',
   category: 'explainer',
   readingTimeMinutes: 8,

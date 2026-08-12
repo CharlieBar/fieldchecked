@@ -3,6 +3,7 @@ import type { VerdictContent } from '@/types/content';
 export const verdict: VerdictContent = {
   slug: 'rtx-5080-local-ai-reddit',
   status: 'draft',
+  vertical: 'A',
   datePublished: '2026-08-10',
 
   seo: {
@@ -175,8 +176,8 @@ export const verdict: VerdictContent = {
     about: [{ name: 'NVIDIA GeForce RTX 5080', type: 'Product' }],
   },
 
-  relatedReviews: ['/reviews/rtx-5070-ti-local-ai/', '/reviews/rtx-3090-used-local-llm/'],
-  related: ['/vs/rtx-5070-ti-vs-rtx-3090/', '/guides/best-gpu-for-local-llm-inference-2026/'],
+  relatedReviews: ['/reviews/rtx-4080-super-local-llm/', '/reviews/rtx-4070-ti-super-local-ai/'],
+  related: ['/vs/rtx-4080-super-vs-rtx-4070-ti-super/', '/guides/best-gpu-for-local-llm-inference-2026/'],
 };
 
 export default verdict;

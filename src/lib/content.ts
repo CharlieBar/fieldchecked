@@ -57,6 +57,33 @@ export const hubs = {
     intro:
       'Synthesised from public discussion — subreddits, forums, reviewer videos — with every source linked. These pages are not our own hands-on testing, and they say so on every page.',
   },
+  builds: {
+    label: 'Build',
+    name: 'Builds',
+    path: '/builds/',
+    eyebrow: 'Vertical B · Tooling',
+    headline: 'Tools built with Claude Code, with the artifacts attached',
+    intro:
+      'Real business problems, solved with real code that shipped. Every build here has something concrete behind it — a repo, a transcript, an output — and a stated list of what it does not do.',
+  },
+  studio: {
+    label: 'Studio',
+    name: 'Studio',
+    path: '/studio/',
+    eyebrow: 'Vertical B · Assets',
+    headline: 'Marketing-asset pipelines that survive client work',
+    intro:
+      'Generation pipelines for posters, infographics and ad creative, with the samples they actually produced and an honest account of the steps still done by hand.',
+  },
+  experiments: {
+    label: 'Experiment',
+    name: 'Experiments',
+    path: '/experiments/',
+    eyebrow: 'Vertical B · Results',
+    headline: 'What this site’s own SEO tests actually found',
+    intro:
+      'Results from experiments run on this domain, drawn from Search Console rather than from vendor claims. Null results are published with the same prominence as positive ones.',
+  },
   blog: {
     label: 'Article',
     name: 'Blog',

@@ -3,6 +3,7 @@ import type { GuideContent } from '@/types/content';
 export const guide: GuideContent = {
   slug: 'multi-gpu-setup-for-local-ai',
   status: 'published',
+  vertical: 'A',
   datePublished: '2026-08-06',
   difficulty: 'intermediate',
   timeEstimate: 'An afternoon, plus ordering time',
@@ -203,7 +204,7 @@ export const guide: GuideContent = {
   },
 
   related: [
-    '/reviews/rtx-3090-used-local-llm/',
+    '/reviews/rtx-4080-super-local-llm/',
     '/guides/best-gpu-for-local-llm-inference-2026/',
     '/benchmarks/llama-3-3-70b/',
   ],

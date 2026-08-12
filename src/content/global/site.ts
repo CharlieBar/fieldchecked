@@ -32,6 +32,9 @@ export const site: SiteConfig = {
     { label: 'Guides', href: '/guides/' },
     { label: 'Benchmarks', href: '/benchmarks/' },
     { label: 'Verdict', href: '/verdict/' },
+    { label: 'Builds', href: '/builds/' },
+    { label: 'Studio', href: '/studio/' },
+    { label: 'Experiments', href: '/experiments/' },
     { label: 'Blog', href: '/blog/' },
   ],
   footer: {
@@ -44,6 +47,14 @@ export const site: SiteConfig = {
           { label: 'Benchmarks', href: '/benchmarks/' },
           { label: 'Reviews', href: '/reviews/' },
           { label: 'Comparisons', href: '/vs/' },
+        ],
+      },
+      {
+        heading: 'Tooling',
+        links: [
+          { label: 'Builds', href: '/builds/' },
+          { label: 'Studio', href: '/studio/' },
+          { label: 'Experiments', href: '/experiments/' },
         ],
       },
       {
@@ -80,4 +91,32 @@ export const site: SiteConfig = {
   // mail, so the contact address needs a real mail domain regardless of where
   // the site is served from. Confirm this mailbox exists before launch.
   contactEmail: 'hello@fieldchecked.com',
+
+  /**
+   * The hardware record. This is the list /about/ renders and the list the
+   * validator checks every `pending-verification` row against — a row naming a
+   * GPU that is not here fails the build. Adding a card to the rig means adding
+   * it here first; that is the whole point.
+   *
+   * The three cards form a deliberate ladder — 8GB, then two 16GB cards at
+   * different bandwidth — which is the buying decision most readers are
+   * actually making.
+   */
+  hardwareInventory: [
+    {
+      label: 'RTX 4060 8GB',
+      vramGb: 8,
+      role: 'Budget tier — where the 8GB capacity cliff shows up',
+    },
+    {
+      label: 'RTX 4070 Ti Super 16GB',
+      vramGb: 16,
+      role: 'Mid tier — the cheapest card here that holds a 14B model comfortably',
+    },
+    {
+      label: 'RTX 4080 Super 16GB',
+      vramGb: 16,
+      role: 'Upper-mid tier — same capacity as the 4070 Ti Super, more bandwidth',
+    },
+  ],
 };

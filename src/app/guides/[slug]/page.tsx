@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ArticleShell } from '@/components/ArticleShell';
-import { ComparisonTable } from '@/components/tables';
+import { BenchmarkTable, ComparisonTable } from '@/components/tables';
 import { bySlug, guides } from '@/content';
 import { hubs } from '@/lib/content';
 import { metadataFrom, trail } from '@/lib/seo';
@@ -50,6 +50,19 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
               <ComparisonTable
                 columns={guide.comparisonTable.columns}
                 rows={guide.comparisonTable.rows}
+              />
+            </section>
+          )}
+
+          {/* Typed throughput, same rule as /vs/ — see CLAUDE.md. */}
+          {guide.benchmarks && guide.benchmarks.length > 0 && (
+            <section aria-labelledby="throughput" className="mt-10">
+              <h2 id="throughput" className="text-section font-bold">
+                Measured throughput
+              </h2>
+              <BenchmarkTable
+                rows={guide.benchmarks}
+                caption="Single-stream generation, batch size 1. Provenance is stated per row."
               />
             </section>
           )}

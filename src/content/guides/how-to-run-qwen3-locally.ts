@@ -3,6 +3,7 @@ import type { GuideContent } from '@/types/content';
 export const guide: GuideContent = {
   slug: 'how-to-run-qwen3-locally',
   status: 'published',
+  vertical: 'A',
   datePublished: '2026-08-05',
   difficulty: 'beginner',
   timeEstimate: '30–45 minutes',

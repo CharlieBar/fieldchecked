@@ -3,6 +3,7 @@ import type { ReviewContent } from '@/types/content';
 export const review: ReviewContent = {
   slug: 'rtx-4080-super-local-llm',
   status: 'draft',
+  vertical: 'A',
   datePublished: '2026-08-12',
   product: 'NVIDIA GeForce RTX 4080 Super (16GB)',
   priceUsd: 899,
@@ -194,7 +195,7 @@ export const review: ReviewContent = {
   },
 
   related: [
-    '/vs/rtx-4080-super-vs-rtx-3090/',
+    '/vs/rtx-4080-super-vs-rtx-4070-ti-super/',
     '/benchmarks/qwen3-14b/',
     '/guides/best-gpu-for-local-llm-inference-2026/',
   ],

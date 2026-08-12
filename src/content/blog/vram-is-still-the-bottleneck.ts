@@ -3,6 +3,7 @@ import type { BlogContent } from '@/types/content';
 export const post: BlogContent = {
   slug: 'vram-is-still-the-bottleneck',
   status: 'published',
+  vertical: 'A',
   datePublished: '2026-08-12',
   category: 'explainer',
   readingTimeMinutes: 7,

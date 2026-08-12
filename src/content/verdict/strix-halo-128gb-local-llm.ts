@@ -3,6 +3,7 @@ import type { VerdictContent } from '@/types/content';
 export const verdict: VerdictContent = {
   slug: 'strix-halo-128gb-local-llm',
   status: 'draft',
+  vertical: 'A',
   datePublished: '2026-08-07',
 
   seo: {
@@ -176,7 +177,7 @@ export const verdict: VerdictContent = {
     about: [{ name: 'Unified memory local inference systems', type: 'Thing' }],
   },
 
-  relatedReviews: ['/reviews/rtx-3090-used-local-llm/'],
+  relatedReviews: ['/reviews/rtx-4080-super-local-llm/'],
   related: ['/guides/multi-gpu-setup-for-local-ai/', '/blog/vram-is-still-the-bottleneck/'],
 };
 

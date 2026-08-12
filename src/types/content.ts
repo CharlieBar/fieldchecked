@@ -57,6 +57,21 @@ export interface LinkRef {
 }
 
 /**
+ * A GPU we physically have. This list is the hardware record: /about/ renders
+ * it, and the validator refuses to let any row claim a `pending-verification`
+ * measurement on a GPU that is not in it. That makes "we planned to measure
+ * something on hardware we do not own" a build failure rather than something
+ * a reader has to catch.
+ */
+export interface HardwareUnit {
+  /** Canonical name, matched against BenchmarkRow.gpu. e.g. "RTX 4060 8GB". */
+  label: string;
+  vramGb: number;
+  /** What this card is here to represent in the ladder. */
+  role: string;
+}
+
+/**
  * How much trust a number on this site has earned.
  *
  * Nothing may be published as `measured` until it has been reproduced on the
@@ -70,6 +85,19 @@ export type DataStatus =
   | 'vendor-claimed';
 
 export type PublishStatus = 'draft' | 'published';
+
+/**
+ * Which vertical a page belongs to.
+ *
+ *   A — local AI hardware:  /reviews/ /vs/ /benchmarks/ /verdict/
+ *   B — AI tooling:         /builds/ /studio/ /experiments/
+ *
+ * Tagged on every content file so the two can be attributed separately in
+ * Search Console. Running them on one domain makes ranking attribution
+ * messier, so they must never be evaluated in a single aggregate number.
+ * `/guides/` and `/blog/` serve both and are tagged per page.
+ */
+export type Vertical = 'A' | 'B';
 
 /* ------------------------------------------------------------------ */
 /* Body sections (discriminated union rendered by SectionRenderer)      */
@@ -234,6 +262,7 @@ export interface BaseContent {
   faqs: Faq[];
   schema: SchemaHint;
   status: PublishStatus;
+  vertical: Vertical;
   /** Internal links out to related content, by site-relative path. */
   related?: string[];
   author?: string;
@@ -254,11 +283,24 @@ export interface ReviewContent extends BaseContent {
 
 export interface VsContent extends BaseContent {
   contenders: [string, string, ...string[]];
-  /** Table rendered above the fold, per the §4 format rules. */
+  /**
+   * Table rendered above the fold, per the §4 format rules.
+   *
+   * Spec and price facts only. Throughput figures must NOT live here as free
+   * text — a string cell carries no provenance, so an unverified number could
+   * reach a published page without the validator seeing it. Put every
+   * tokens/sec figure in `benchmarks` below, where it carries a status.
+   * The validator enforces this.
+   */
   comparisonTable: {
     columns: string[];
     rows: TableCell[][];
   };
+  /**
+   * Throughput backing this comparison, typed and provenance-tagged exactly
+   * like a /benchmarks/ page. Rendered through the same BenchmarkTable.
+   */
+  benchmarks?: BenchmarkRow[];
   winner: { name: string; reason: string };
   /** Situational recommendations — "pick A if…, pick B if…". */
   pickIf: { contender: string; scenario: string }[];
@@ -269,11 +311,16 @@ export interface GuideContent extends BaseContent {
   timeEstimate: string;
   /** Hardware/software the reader needs before starting. */
   requirements: string[];
-  /** Optional above-the-fold comparison table (budget tiers, options…). */
+  /**
+   * Optional above-the-fold comparison table (budget tiers, options…).
+   * Same rule as /vs/: spec and price facts only, no free-text throughput.
+   */
   comparisonTable?: {
     columns: string[];
     rows: TableCell[][];
   };
+  /** Provenance-tagged throughput, when a guide cites any. */
+  benchmarks?: BenchmarkRow[];
 }
 
 export interface BenchmarkContent extends BaseContent {
@@ -301,13 +348,104 @@ export interface BlogContent extends BaseContent {
   readingTimeMinutes: number;
 }
 
+/* ------------------------------------------------------------------ */
+/* Vertical B — AI tooling for businesses                              */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The verification anchor for a /builds/ page. A build post without something
+ * concrete behind it is a claim, and claims are what this site exists not to
+ * publish. At least one is required before a build page may go published.
+ */
+export interface BuildArtifact {
+  type: 'repo' | 'screenshot' | 'output-sample' | 'metric';
+  label: string;
+  url?: string;
+  caption: string;
+}
+
+/**
+ * Outcome of a build.
+ *
+ * NOTE: `provenance` here is deliberately narrower than the site-wide
+ * `DataStatus` enum. A build result is either something measured or something
+ * estimated; the hardware vocabulary ('vendor-claimed', 'community-reported')
+ * has no meaning for a tool you wrote yourself. A `measured` result must point
+ * at an artifact — the validator enforces that.
+ */
+export interface BuildResult {
+  metric: string;
+  before?: string;
+  after: string;
+  provenance: 'measured' | 'estimated';
+  /** `label` of the BuildArtifact that evidences this, required when measured. */
+  artifactLabel?: string;
+}
+
+export interface BuildContent extends BaseContent {
+  /** The real business problem this solved. Not a hypothetical. */
+  problem: string;
+  artifacts: BuildArtifact[];
+  stack: string[];
+  results: BuildResult[];
+  /** What it does not do. A build post with no limitations is marketing. */
+  limitations: string[];
+}
+
+export interface StudioSample {
+  label: string;
+  /** Path under /public. The validator checks the file exists before publish. */
+  imagePath: string;
+  prompt?: string;
+  caption: string;
+}
+
+export interface StudioContent extends BaseContent {
+  /** The client or business need this pipeline served. */
+  useCase: string;
+  pipeline: { step: string; tool: string; notes: string }[];
+  samples: StudioSample[];
+  beforeAfter?: { before: string; after: string; context: string };
+}
+
+/** A measurement pulled from analytics, not from a model's imagination. */
+export interface ExperimentDataPoint {
+  metric: string;
+  before: number;
+  after: number;
+  window: string;
+  source: 'GSC' | 'GA4' | 'Plausible' | 'manual-observation';
+}
+
+export interface ExperimentContent extends BaseContent {
+  hypothesis: string;
+  method: {
+    change: string;
+    startDate: string;
+    endDate: string;
+    controls: string[];
+  };
+  dataPoints: ExperimentDataPoint[];
+  /**
+   * 'inconclusive' is a valid and expected outcome. Publishing null results is
+   * the credibility mechanism for this pillar — never let the pipeline reshape
+   * an inconclusive test into a confident claim.
+   */
+  result: 'confirmed' | 'refuted' | 'inconclusive';
+  /** n=1 site, confounds, seasonality. Required; cannot be empty. */
+  caveats: string[];
+}
+
 export type AnyContent =
   | ReviewContent
   | VsContent
   | GuideContent
   | BenchmarkContent
   | VerdictContent
-  | BlogContent;
+  | BlogContent
+  | BuildContent
+  | StudioContent
+  | ExperimentContent;
 
 /* ------------------------------------------------------------------ */
 /* Global site content                                                 */
@@ -337,4 +475,9 @@ export interface SiteConfig {
   /** Disclosure shown on any page carrying unverified numbers. */
   dataDisclosure: string;
   contactEmail: string;
+  /**
+   * Every GPU available for testing. Single source of truth — /about/ renders
+   * this, and `npm run qa:content` validates benchmark rows against it.
+   */
+  hardwareInventory: HardwareUnit[];
 }

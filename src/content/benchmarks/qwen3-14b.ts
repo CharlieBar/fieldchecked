@@ -5,18 +5,19 @@ export const benchmark: BenchmarkContent = {
   model: 'qwen3-14b',
   modelDisplayName: 'Qwen3 14B',
   status: 'draft',
+  vertical: 'A',
   datePublished: '2026-08-12',
   updateCadenceDays: 14,
 
   seo: {
-    title: 'Qwen3 14B Tokens per Second Benchmarks by GPU',
+    title: 'Qwen3 14B Tokens per Second: 8GB vs 16GB, Measured',
     description:
-      'Generation and prompt-processing throughput for Qwen3 14B across consumer GPUs, with quantisation, context length and VRAM footprint recorded for every run.',
+      'Generation and prompt-processing throughput for Qwen3 14B on an RTX 4060, 4070 Ti Super and 4080 Super, with quantisation, context length and VRAM recorded per run.',
     keywords: [
       'qwen3 14b tokens per second',
       'qwen3 14b benchmark',
       'qwen3 14b vram',
-      'qwen3 gpu benchmark',
+      'qwen3 14b rtx 4060',
       'local llm tokens per second benchmark',
     ],
     canonical: '/benchmarks/qwen3-14b/',
@@ -26,12 +27,12 @@ export const benchmark: BenchmarkContent = {
     eyebrow: 'Living dataset',
     headline: 'Qwen3 14B: Tokens per Second by GPU',
     subheadline:
-      'The 14B class is where most 16GB cards are genuinely comfortable, which makes it the most useful single point of comparison between them.',
+      'A 14B model at 4-bit is the cleanest test of the 8GB-versus-16GB question, because it fits comfortably on one side of that line and not at all on the other.',
     lastUpdated: '2026-08-12',
   },
 
   quickAnswer:
-    'Qwen3 14B at Q4_K_M needs roughly 9GB of weights, so it runs fully offloaded on any 16GB card with room left for an 8k–16k context window. Generation throughput on current-generation 16GB cards lands around 60 tokens per second, previous-generation 16GB cards around 50, and a used 24GB card around 44 — slower per token, but with far more context headroom. Because the model fits everywhere in this table, the numbers are a clean read on memory bandwidth rather than capacity. That makes this the one dataset on the site where comparing cards purely on throughput is actually valid.',
+    'Qwen3 14B at Q4_K_M needs roughly 9GB of weights, which decides everything else. On a 16GB card it runs fully resident with room for an 8k context window, landing around 52 tokens per second on an RTX 4080 Super and around 44 on an RTX 4070 Ti Super — a gap that reflects memory bandwidth, since both cards hold the model identically. On an 8GB RTX 4060 the same model does not fit: roughly half its layers are read from system RAM instead, and throughput collapses to single digits. That is not a slow GPU, it is a capacity cliff, and no amount of quantisation tuning on an 8GB card recovers the difference.',
 
   testRig: [
     { label: 'CPU', value: 'AMD Ryzen 9 7950X' },
@@ -53,17 +54,6 @@ export const benchmark: BenchmarkContent = {
 
   rows: [
     {
-      gpu: 'RTX 5070 Ti 16GB',
-      model: 'Qwen3 14B',
-      quantization: 'Q4_K_M',
-      tokensPerSec: 61,
-      promptTokensPerSec: 2100,
-      vramGb: 10.4,
-      contextLength: 8192,
-      runtime: 'llama.cpp',
-      status: 'pending-verification',
-    },
-    {
       gpu: 'RTX 4080 Super 16GB',
       model: 'Qwen3 14B',
       quantization: 'Q4_K_M',
@@ -75,15 +65,29 @@ export const benchmark: BenchmarkContent = {
       status: 'pending-verification',
     },
     {
-      gpu: 'RTX 3090 24GB',
+      gpu: 'RTX 4070 Ti Super 16GB',
       model: 'Qwen3 14B',
       quantization: 'Q4_K_M',
       tokensPerSec: 44,
-      promptTokensPerSec: 1420,
+      promptTokensPerSec: 1560,
       vramGb: 10.4,
       contextLength: 8192,
       runtime: 'llama.cpp',
       status: 'pending-verification',
+      notes: 'Same footprint as the 4080 Super above; the gap is bandwidth, not capacity.',
+    },
+    {
+      gpu: 'RTX 4060 8GB',
+      model: 'Qwen3 14B',
+      quantization: 'Q4_K_M',
+      tokensPerSec: 6.8,
+      promptTokensPerSec: 240,
+      vramGb: 7.6,
+      contextLength: 4096,
+      runtime: 'llama.cpp (partial CPU offload)',
+      status: 'pending-verification',
+      notes:
+        'Roughly half the layers spill to system RAM. This row is the 8GB capacity cliff, not a slow GPU.',
     },
     {
       gpu: 'RTX 4080 Super 16GB',
@@ -98,16 +102,16 @@ export const benchmark: BenchmarkContent = {
       notes: 'Higher precision roughly doubles the weight footprint and cuts context sharply.',
     },
     {
-      gpu: 'RTX 3090 24GB',
+      gpu: 'RTX 4070 Ti Super 16GB',
       model: 'Qwen3 14B',
       quantization: 'Q8_0',
-      tokensPerSec: 27,
-      promptTokensPerSec: 1250,
+      tokensPerSec: 26,
+      promptTokensPerSec: 1080,
       vramGb: 15.1,
-      contextLength: 16384,
+      contextLength: 4096,
       runtime: 'llama.cpp',
       status: 'pending-verification',
-      notes: 'Same quantisation as the row above, four times the context. This is what 24GB buys.',
+      notes: 'Both 16GB cards give up most of their context window to buy precision.',
     },
   ],
 
@@ -116,22 +120,22 @@ export const benchmark: BenchmarkContent = {
       type: 'prose',
       heading: 'Why this model is the reference point',
       body: [
-        'A useful comparison benchmark has to fit on every card being compared, otherwise the numbers stop describing the same workload. Qwen3 14B at 4-bit does that across the whole consumer range from 16GB upward, which makes it the cleanest single-model read on relative card performance available.',
-        'The pattern in the data is the one bandwidth-bound generation always produces: throughput tracks memory bandwidth and architecture, and the ranking barely moves as long as everything stays resident in VRAM.',
+        'A useful comparison benchmark has to sit near the decision boundary, otherwise every card looks the same. Qwen3 14B at 4-bit does exactly that: it fits with room to spare on a 16GB card and does not fit on an 8GB one, so a single model exposes both the capacity cliff and the bandwidth difference in one table.',
+        'Read the first two rows as the bandwidth question and the third as the capacity question. They are different questions, and conflating them is the most common mistake in GPU buying advice.',
       ],
     },
     {
       type: 'callout',
-      tone: 'info',
-      heading: 'Read the last two rows together',
-      body: 'The two Q8_0 rows show the same model at the same quantisation on two cards. The throughput difference is modest. The context difference is fourfold. That is the entire capacity argument in two lines of a table.',
+      tone: 'warn',
+      heading: 'The 4060 row is not a slow-GPU result',
+      body: 'Six to seven tokens per second on the 4060 is a measurement of system RAM bandwidth, not of the card. Once layers live outside VRAM the GPU spends most of each token waiting. A faster 8GB card would produce a very similar number.',
     },
     {
       type: 'prose',
       heading: 'Quantisation cost',
       body: [
-        'Moving from Q4_K_M to Q8_0 roughly doubles the weight footprint and reduces generation throughput substantially, because there is simply more data to stream per token. What you get back is output quality, which matters more on some tasks than others.',
-        'On a 16GB card that trade is expensive: the higher-precision variant eats the context headroom that made the setup comfortable. On 24GB it is affordable, which is another way capacity converts into practical flexibility rather than raw speed.',
+        'Moving from Q4_K_M to Q8_0 roughly doubles the weight footprint and cuts generation throughput substantially, because there is more data to stream per token. What you get back is output quality, which matters more on some tasks than others.',
+        'On a 16GB card that trade is expensive: the higher-precision variant eats the context headroom that made the setup comfortable in the first place. Both 16GB cards here drop from an 8k window to 4k to afford it.',
       ],
     },
   ],
@@ -140,7 +144,7 @@ export const benchmark: BenchmarkContent = {
     {
       question: 'How many tokens per second does Qwen3 14B produce?',
       answer:
-        'On current-generation 16GB cards, around 60 tokens per second at Q4_K_M with the model fully in VRAM. Previous-generation 16GB cards land near 50, and a used 24GB card around 44. All figures are single-stream at a 512-token prompt.',
+        'Around 52 tokens per second on an RTX 4080 Super and 44 on an RTX 4070 Ti Super, both at Q4_K_M with the model fully resident in VRAM. On an 8GB card that cannot hold it, throughput falls to single digits because layers are read from system RAM.',
     },
     {
       question: 'How much VRAM does Qwen3 14B need?',
@@ -148,24 +152,24 @@ export const benchmark: BenchmarkContent = {
         'Roughly 9GB for weights at Q4_K_M, with peak usage around 10.4GB at 8k context once KV cache is included. At Q8_0 the footprint rises to about 15GB, which leaves very little headroom on a 16GB card.',
     },
     {
-      question: 'Can Qwen3 14B run on a 12GB GPU?',
+      question: 'Can Qwen3 14B run on an 8GB GPU?',
       answer:
-        'At Q4_K_M with a short context window, yes, but with little margin. Raising context or quantisation will push layers into system RAM and collapse throughput, so a 16GB card is the comfortable minimum for this model.',
+        'It loads, but roughly half the layers offload to system RAM and generation drops to single-digit tokens per second. It technically produces output and is too slow for interactive use. For 8GB cards an 8B-class model is the sensible ceiling.',
     },
     {
       question: 'Is Q4_K_M or Q8_0 better for Qwen3 14B?',
       answer:
-        'Q4_K_M for constrained cards — it is roughly twice as fast and leaves room for context. Q8_0 preserves more output quality and is worth it only if you have capacity to spare after accounting for the context length you need.',
+        'Q4_K_M for almost everyone — it is faster and leaves room for context. Q8_0 preserves more output quality but costs roughly half your context window on a 16GB card, which is usually the worse trade.',
     },
     {
-      question: 'Why is the 24GB card slower than the 16GB cards here?',
+      question: 'Why is the 4080 Super faster than the 4070 Ti Super here?',
       answer:
-        'Because this model fits on all of them, so the comparison measures memory bandwidth and architecture rather than capacity. The older card is slower per token while offering far more context headroom at the same quantisation.',
+        'Memory bandwidth. Both cards hold the model identically at 16GB, so capacity is not the differentiator; token generation is bandwidth-bound, and the 4080 Super streams weights faster.',
     },
     {
       question: 'Does context length affect tokens per second?',
       answer:
-        'Yes, indirectly and increasingly. Longer context means a larger KV cache to read from each step, so generation slows as the window fills. It also raises peak VRAM, which can force an offload that slows things dramatically.',
+        'Yes, increasingly as the window fills. A longer context means a larger KV cache to read each step, so generation slows. It also raises peak VRAM, which can force an offload that slows things dramatically.',
     },
     {
       question: 'How often are these Qwen3 benchmarks updated?',
@@ -175,7 +179,7 @@ export const benchmark: BenchmarkContent = {
     {
       question: 'What runtime were these numbers measured with?',
       answer:
-        'llama.cpp, single-stream at batch size 1 with a 512-token prompt and a 256-token completion. Other runtimes will produce different figures on identical hardware, which is why the runtime is recorded in every row.',
+        'llama.cpp, single-stream at batch size 1 with a 512-token prompt and a 256-token completion. Other runtimes produce different figures on identical hardware, which is why the runtime is recorded in every row.',
     },
     {
       question: 'Do these numbers apply to the reasoning modes of Qwen3?',

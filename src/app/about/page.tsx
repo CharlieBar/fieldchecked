@@ -35,6 +35,30 @@ export default function AboutPage() {
       <h1 className="mt-6 text-hero font-bold">{aboutPage.heading}</h1>
       <p className="mt-4 max-w-3xl text-lg text-secondary">{aboutPage.intro}</p>
 
+      {/*
+        The GPU list is rendered from site.hardwareInventory rather than written
+        into the About copy, so the page a reader checks and the list the
+        validator enforces cannot drift apart.
+      */}
+      <section aria-labelledby="hardware" className="mt-12">
+        <h2 id="hardware" className="text-section font-bold">
+          GPUs available for testing
+        </h2>
+        <ul className="mt-4 grid gap-px overflow-hidden rounded border border-border bg-border sm:grid-cols-3">
+          {site.hardwareInventory.map((unit) => (
+            <li key={unit.label} className="bg-surface px-4 py-4">
+              <p className="numeric font-display text-base font-semibold text-text">
+                {unit.label}
+              </p>
+              <p className="numeric mt-1 font-display text-xs text-primary">
+                {unit.vramGb} GB VRAM
+              </p>
+              <p className="mt-2 text-sm text-secondary">{unit.role}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       {/* Anchor target for the footer "Methodology" link. */}
       <div id="methodology" className="scroll-mt-24">
         <SectionRenderer sections={aboutPage.sections} />

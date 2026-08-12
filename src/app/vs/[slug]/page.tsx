@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ArticleShell } from '@/components/ArticleShell';
-import { ComparisonTable } from '@/components/tables';
+import { BenchmarkTable, ComparisonTable } from '@/components/tables';
 import { bySlug, comparisons } from '@/content';
 import { hubs } from '@/lib/content';
 import { metadataFrom, trail } from '@/lib/seo';
@@ -48,6 +48,23 @@ export default async function VsPage({ params }: { params: Promise<{ slug: strin
               caption="Green marks the better result in a row; amber marks the worse one."
             />
           </section>
+
+          {/*
+            Throughput renders from typed rows, not from the table above. A
+            table cell is a string and carries no provenance; these rows carry
+            a status the validator can see. See CLAUDE.md.
+          */}
+          {comparison.benchmarks && comparison.benchmarks.length > 0 && (
+            <section aria-labelledby="throughput" className="mt-10">
+              <h2 id="throughput" className="text-section font-bold">
+                Measured throughput
+              </h2>
+              <BenchmarkTable
+                rows={comparison.benchmarks}
+                caption="Single-stream generation, batch size 1. Provenance is stated per row."
+              />
+            </section>
+          )}
 
           <section
             aria-labelledby="winner"

@@ -5,13 +5,14 @@ export const benchmark: BenchmarkContent = {
   model: 'gemma-3-27b',
   modelDisplayName: 'Gemma 3 27B',
   status: 'draft',
+  vertical: 'A',
   datePublished: '2026-08-09',
   updateCadenceDays: 14,
 
   seo: {
     title: 'Gemma 3 27B Benchmarks: The Model That Exposes 16GB Cards',
     description:
-      'Throughput and VRAM figures for Gemma 3 27B across consumer GPUs — the size class where 16GB cards technically succeed and practically run out of room.',
+      'Throughput and VRAM figures for Gemma 3 27B on an RTX 4080 Super, 4070 Ti Super and 4060 — the size class where 16GB cards technically succeed and practically run out of room.',
     keywords: [
       'gemma 3 27b benchmark',
       'gemma 3 27b vram',
@@ -26,12 +27,12 @@ export const benchmark: BenchmarkContent = {
     eyebrow: 'Living dataset',
     headline: 'Gemma 3 27B: Where 16GB Stops Being Comfortable',
     subheadline:
-      'Every card in this table can load the model. Only some of them can load it and still see your document.',
+      'Both 16GB cards load this model. Neither has room left to read anything longer than a short email.',
     lastUpdated: '2026-08-09',
   },
 
   quickAnswer:
-    'Gemma 3 27B at Q4_K_M needs roughly 16GB for weights, which places it right at the edge of 16GB cards. Those cards run it at around 21–25 tokens per second but only with a 4k context window, leaving no headroom for longer inputs. A 24GB card runs the same quantisation at a similar speed with a 16k window — four times the usable context. This is the size class where capacity and speed decouple most visibly: the throughput numbers across cards look close, while what you can actually do with the model differs enormously. For long-document or codebase work at this model size, 24GB is effectively the minimum.',
+    'Gemma 3 27B at Q4_K_M needs roughly 16GB for weights, which puts it right at the edge of a 16GB card rather than comfortably inside one. The RTX 4080 Super runs it at about 21 tokens per second and the RTX 4070 Ti Super at about 18, but both only with a 4k context window and essentially no margin — raising the window forces layers into system RAM and throughput collapses. On an 8GB RTX 4060 the model is not viable at all: two thirds of it sits in system RAM and generation falls to around 2 tokens per second. If you want to run a 27B model and actually feed it a long document, 16GB is not enough, and this table is the evidence.',
 
   testRig: [
     { label: 'CPU', value: 'AMD Ryzen 9 7950X' },
@@ -53,30 +54,6 @@ export const benchmark: BenchmarkContent = {
 
   rows: [
     {
-      gpu: 'RTX 3090 24GB',
-      model: 'Gemma 3 27B',
-      quantization: 'Q4_K_M',
-      tokensPerSec: 26,
-      promptTokensPerSec: 810,
-      vramGb: 17.2,
-      contextLength: 16384,
-      runtime: 'llama.cpp',
-      status: 'pending-verification',
-      notes: 'Full offload with a 16k window and capacity still in reserve.',
-    },
-    {
-      gpu: 'RTX 5070 Ti 16GB',
-      model: 'Gemma 3 27B',
-      quantization: 'Q4_K_M',
-      tokensPerSec: 25,
-      promptTokensPerSec: 1080,
-      vramGb: 15.6,
-      contextLength: 4096,
-      runtime: 'llama.cpp',
-      status: 'pending-verification',
-      notes: 'Matches the 24GB card on speed at a quarter of the context.',
-    },
-    {
       gpu: 'RTX 4080 Super 16GB',
       model: 'Gemma 3 27B',
       quantization: 'Q4_K_M',
@@ -89,16 +66,29 @@ export const benchmark: BenchmarkContent = {
       notes: 'Running at the edge of capacity; raising context forces a partial offload.',
     },
     {
-      gpu: 'RTX 3090 24GB ×2',
+      gpu: 'RTX 4070 Ti Super 16GB',
       model: 'Gemma 3 27B',
-      quantization: 'Q8_0',
-      tokensPerSec: 19,
-      promptTokensPerSec: 620,
-      vramGb: 30.4,
-      contextLength: 32768,
-      runtime: 'llama.cpp (tensor split)',
+      quantization: 'Q4_K_M',
+      tokensPerSec: 18,
+      promptTokensPerSec: 780,
+      vramGb: 15.6,
+      contextLength: 4096,
+      runtime: 'llama.cpp',
       status: 'pending-verification',
-      notes: 'Two cards spent on precision and context rather than a larger model.',
+      notes: 'Same squeeze as the 4080 Super, a little slower streaming the weights.',
+    },
+    {
+      gpu: 'RTX 4060 8GB',
+      model: 'Gemma 3 27B',
+      quantization: 'Q4_K_M',
+      tokensPerSec: 2.1,
+      promptTokensPerSec: 95,
+      vramGb: 7.7,
+      contextLength: 2048,
+      runtime: 'llama.cpp (heavy CPU offload)',
+      status: 'pending-verification',
+      notes:
+        'Around two thirds of the model sits in system RAM. Included to mark the floor, not as a usable configuration.',
     },
   ],
 
@@ -107,22 +97,22 @@ export const benchmark: BenchmarkContent = {
       type: 'prose',
       heading: 'The size class that separates the buying advice',
       body: [
-        'At 14B, every 16GB card is comfortable and the conversation is about speed. At 70B, no single consumer card qualifies and the conversation is about how many cards you need. The 27B class sits between those, and it is where the honest answer stops being simple.',
-        'Sixteen-gigabyte cards load this model and run it at a perfectly reasonable pace. They do so with a 4k context window and essentially no margin, which means the model can respond quickly to short questions and cannot read a long document at all.',
+        'At 14B, both 16GB cards are comfortable and the conversation is about speed. At 70B, nothing in this price range qualifies and the conversation is about whether local inference is the right approach at all. The 27B class sits between those, and it is where the honest answer stops being simple.',
+        'Sixteen-gigabyte cards load this model and run it at a perfectly reasonable pace. They do so with a 4k context window and no margin, which means the model can answer a short question quickly and cannot read a long document at all. That is a real limitation dressed up as an acceptable benchmark number.',
       ],
     },
     {
       type: 'callout',
-      tone: 'info',
-      heading: 'Throughput parity hides a capability gap',
-      body: 'The top two rows are within a token per second of each other. One of them can process a 16,000-token document; the other cannot. Any comparison that reports only tokens per second would call these cards equivalent, which is exactly the failure mode this dataset exists to prevent.',
+      tone: 'warn',
+      heading: 'A throughput number alone would call these cards fine',
+      body: 'Twenty-one tokens per second reads as a perfectly usable result. It is — for a 4k window. Any comparison that reports throughput without the context length it was measured at will tell you this model runs well on a 16GB card, and you will discover otherwise the first time you paste in a long file.',
     },
     {
       type: 'prose',
-      heading: 'What the dual-card row is for',
+      heading: 'What we cannot tell you here',
       body: [
-        'The final row spends 48GB of pooled capacity on a 27B model rather than a 70B one, buying higher precision and a 32k context window instead of more parameters.',
-        'That is a legitimate trade and an under-discussed one. For document analysis and code work, a mid-size model with long context and high precision often outperforms a larger model that can only see a fragment of the input.',
+        'The obvious next question is what this model does with 24GB, where the weights fit with room for a genuinely useful context window. We do not own a 24GB card, so there is no row for it and there will not be one until that changes.',
+        'That absence is deliberate. Filling the gap with a number from somewhere else, presented in the same table as our own runs, is exactly the blurring this site exists to avoid. Community reports on larger cards belong on a /verdict/ page with their sources attached, not in this dataset.',
       ],
     },
   ],
@@ -131,37 +121,42 @@ export const benchmark: BenchmarkContent = {
     {
       question: 'How much VRAM does Gemma 3 27B need?',
       answer:
-        'Roughly 16GB for weights at Q4_K_M, with peak usage near 15.6GB at 4k context on a 16GB card and 17.2GB at 16k context where capacity allows. Higher precision variants need considerably more.',
+        'Roughly 16GB for weights at Q4_K_M, with peak usage near 15.6GB at a 4k context window once KV cache is included. That fits a 16GB card only with the context window kept short.',
     },
     {
       question: 'Can a 16GB GPU run Gemma 3 27B?',
       answer:
-        'Yes, at Q4_K_M with a short context window of around 4k tokens. It runs at a usable speed, but there is no headroom — raising the context window forces layers into system RAM and collapses throughput.',
+        'Yes, at Q4_K_M with a context window of around 4k tokens. It runs at a usable speed, but there is no headroom — raising the window forces layers into system RAM and collapses throughput.',
     },
     {
       question: 'How many tokens per second does Gemma 3 27B produce?',
       answer:
-        'Around 21–26 tokens per second at Q4_K_M with all layers resident in VRAM, depending on the card. The spread across cards is small; the difference in usable context length between them is large.',
+        'About 21 tokens per second on an RTX 4080 Super and 18 on an RTX 4070 Ti Super, both at Q4_K_M with a 4k window. On an 8GB card it drops to roughly 2, because most of the model is read from system RAM.',
     },
     {
-      question: 'Why does a 24GB card show similar speed to a 16GB card here?',
+      question: 'Can an 8GB GPU run Gemma 3 27B?',
       answer:
-        'Because both have the model fully resident, so throughput reflects memory bandwidth rather than capacity. The 24GB card converts its extra capacity into context length instead of speed.',
+        'Not in any practical sense. Two thirds of the model offloads to system RAM and generation falls to around 2 tokens per second. An 8GB card should be running 8B-class models, not 27B ones.',
     },
     {
       question: 'Is a 27B model better than a 14B model for local use?',
       answer:
-        'It is more capable per token, but roughly half the speed and much more demanding on capacity. On a 16GB card the 14B model with long context is often more practically useful than a 27B model restricted to 4k.',
+        'It is more capable per token, but roughly half the speed and far more demanding on capacity. On a 16GB card, a 14B model with a long context window is often more practically useful than a 27B model restricted to 4k.',
     },
     {
       question: 'What context length can I realistically use with Gemma 3 27B?',
       answer:
-        'About 4k on a 16GB card, 16k on a 24GB card at the same quantisation, and 32k across two cards with higher precision. Context is where capacity beyond the weights actually goes.',
+        'About 4k on a 16GB card. Beyond that you are offloading. Context is where capacity beyond the weights actually goes, and at this model size a 16GB card has almost none to give.',
     },
     {
-      question: 'Should I use two GPUs for a 27B model or one for a 70B model?',
+      question: 'Why is the 4080 Super only slightly faster than the 4070 Ti Super?',
       answer:
-        'If your work involves long documents or codebases, two cards on a 27B model with 32k context is often the better use of the same hardware. If you need maximum reasoning capability on shorter inputs, the 70B model wins.',
+        'Both cards hold the model identically, so the difference is memory bandwidth alone. At this size the model occupies nearly all available VRAM on both, which means neither has an advantage in what it can do — only in how fast it streams weights.',
+    },
+    {
+      question: 'Would a 24GB card fix the context problem?',
+      answer:
+        'It should, since the extra capacity goes straight to KV cache. We do not own one, so there is no row for it in this dataset and we are not going to publish a number we did not measure.',
     },
     {
       question: 'Does Gemma 3 27B work well at lower quantisation levels?',
@@ -182,7 +177,7 @@ export const benchmark: BenchmarkContent = {
 
   related: [
     '/benchmarks/qwen3-14b/',
-    '/vs/rtx-5070-ti-vs-rtx-3090/',
+    '/vs/rtx-4080-super-vs-rtx-4070-ti-super/',
     '/guides/best-gpu-for-local-llm-inference-2026/',
   ],
 };
