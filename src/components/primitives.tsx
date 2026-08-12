@@ -37,8 +37,14 @@ export function Breadcrumbs({ trail }: { trail: { name: string; path: string }[]
 /* Status badges                                                       */
 /* ------------------------------------------------------------------ */
 
+/**
+ * One badge for the whole provenance vocabulary, so a hardware row and a build
+ * result are labelled by the same component rather than by two lookalikes.
+ * Keyed on the full DataStatus, which means adding a status to the enum is a
+ * type error here until it has copy — that exhaustiveness is the point.
+ */
 const DATA_STATUS_COPY: Record<DataStatus, { label: string; tone: string }> = {
-  measured: { label: 'Measured on our rig', tone: 'text-primary border-primary/40' },
+  measured: { label: 'Measured firsthand', tone: 'text-primary border-primary/40' },
   'pending-verification': {
     label: 'Pending verification',
     tone: 'text-accent border-accent/50',
@@ -48,6 +54,7 @@ const DATA_STATUS_COPY: Record<DataStatus, { label: string; tone: string }> = {
     tone: 'text-secondary border-border',
   },
   'vendor-claimed': { label: 'Vendor claimed', tone: 'text-secondary border-border' },
+  estimated: { label: 'Estimated', tone: 'text-accent border-accent/50' },
 };
 
 export function DataStatusTag({ status }: { status: DataStatus }) {

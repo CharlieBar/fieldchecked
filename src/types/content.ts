@@ -72,17 +72,58 @@ export interface HardwareUnit {
 }
 
 /**
- * How much trust a number on this site has earned.
+ * How much trust a number on this site has earned. One vocabulary for the
+ * whole site — there is no second provenance enum anywhere.
  *
- * Nothing may be published as `measured` until it has been reproduced on the
- * rig at Checkpoint 2. Seed and model-drafted content ships as
+ * Nothing may be published as `measured` until it has been reproduced
+ * firsthand at Checkpoint 2. Seed and model-drafted content ships as
  * `pending-verification` and renders with a visible caveat.
+ *
+ * These are declared as runtime arrays with the types derived from them, rather
+ * than as bare type unions, so the validator and the type system read the same
+ * list. A `types/` file holding a few `const`s is a small oddity; two lists that
+ * can drift apart is a bigger one.
  */
-export type DataStatus =
-  | 'measured'
-  | 'pending-verification'
-  | 'community-reported'
-  | 'vendor-claimed';
+export const DATA_STATUSES = [
+  /** Reproduced firsthand. Only a human sets this. */
+  'measured',
+  /** A placeholder that has not been reproduced yet. Blocks publication. */
+  'pending-verification',
+  /** Someone else's report, with a linked source. */
+  'community-reported',
+  /** From a spec sheet. True by definition, not by measurement. */
+  'vendor-claimed',
+  /** A reasoned figure that was never measured — e.g. time saved by a tool. */
+  'estimated',
+] as const;
+
+export type DataStatus = (typeof DATA_STATUSES)[number];
+
+/**
+ * Legal provenance for a throughput row. `estimated` is deliberately excluded:
+ * a tokens/sec figure is either measured, someone else's, or a spec claim.
+ * There is no honest way to estimate one.
+ */
+export const BENCHMARK_STATUSES = [
+  'measured',
+  'pending-verification',
+  'community-reported',
+  'vendor-claimed',
+] as const satisfies readonly DataStatus[];
+
+export type BenchmarkStatus = (typeof BENCHMARK_STATUSES)[number];
+
+/**
+ * Legal provenance for a build outcome. The hardware vocabulary has no meaning
+ * for a tool written in-house — nobody publishes a spec sheet for your script —
+ * so a result is either measured or estimated.
+ */
+export const BUILD_RESULT_STATUSES = [
+  'measured',
+  'estimated',
+] as const satisfies readonly DataStatus[];
+
+export type BuildResultStatus = (typeof BUILD_RESULT_STATUSES)[number];
 
 export type PublishStatus = 'draft' | 'published';
 
@@ -197,7 +238,7 @@ export interface BenchmarkRow {
   vramGb?: number;
   contextLength?: number;
   runtime: string;
-  status: DataStatus;
+  status: BenchmarkStatus;
   notes?: string;
 }
 
@@ -367,17 +408,15 @@ export interface BuildArtifact {
 /**
  * Outcome of a build.
  *
- * NOTE: `provenance` here is deliberately narrower than the site-wide
- * `DataStatus` enum. A build result is either something measured or something
- * estimated; the hardware vocabulary ('vendor-claimed', 'community-reported')
- * has no meaning for a tool you wrote yourself. A `measured` result must point
- * at an artifact — the validator enforces that.
+ * `provenance` is a subset of the site-wide DataStatus vocabulary, not a
+ * separate one — see BUILD_RESULT_STATUSES. A `measured` result must point at
+ * an artifact; the validator enforces that.
  */
 export interface BuildResult {
   metric: string;
   before?: string;
   after: string;
-  provenance: 'measured' | 'estimated';
+  provenance: BuildResultStatus;
   /** `label` of the BuildArtifact that evidences this, required when measured. */
   artifactLabel?: string;
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ArticleShell } from '@/components/ArticleShell';
+import { DataStatusTag } from '@/components/primitives';
 import { builds, bySlug } from '@/content';
 import { hubs } from '@/lib/content';
 import { metadataFrom, trail } from '@/lib/seo';
@@ -102,15 +103,8 @@ export default async function BuildPage({ params }: { params: Promise<{ slug: st
                 <li key={result.metric} className="rounded border border-border bg-surface p-4">
                   <div className="flex flex-wrap items-baseline justify-between gap-3">
                     <p className="font-display text-sm font-medium">{result.metric}</p>
-                    <span
-                      className={`rounded border px-1.5 py-0.5 font-display text-[10px] uppercase tracking-wider ${
-                        result.provenance === 'measured'
-                          ? 'border-primary/40 text-primary'
-                          : 'border-accent/50 text-accent'
-                      }`}
-                    >
-                      {result.provenance}
-                    </span>
+                    {/* Same badge as a benchmark row — one vocabulary, one component. */}
+                    <DataStatusTag status={result.provenance} />
                   </div>
                   <p className="numeric mt-2 text-sm text-text/85">
                     {result.before ? `${result.before} → ` : ''}

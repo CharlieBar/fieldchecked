@@ -78,6 +78,31 @@ function normaliseGpu(label) {
 
 const INVENTORY = new Set(site.hardwareInventory.map((unit) => normaliseGpu(unit.label)));
 
+/**
+ * Provenance vocabulary, imported from the same declaration the types derive
+ * from. One list, one code path: `checkStatusValue` below is the only place any
+ * provenance value is validated, for hardware rows and build results alike.
+ */
+const { BENCHMARK_STATUSES, BUILD_RESULT_STATUSES } = await import(
+  pathToFileURL(path.join(ROOT, 'src', 'types', 'content.ts')).href
+);
+
+function checkStatusValue(file, { label, value, legal }) {
+  if (!value) {
+    fail(file, `${label} has no provenance status — every number carries one`);
+    return false;
+  }
+  if (!legal.includes(value)) {
+    fail(
+      file,
+      `${label} has provenance "${value}", which is not legal here ` +
+        `(allowed: ${legal.join(', ')})`,
+    );
+    return false;
+  }
+  return true;
+}
+
 function fail(file, message) {
   errors.push({ file, message });
 }
@@ -231,7 +256,11 @@ function checkFreeTextThroughput(file, c) {
 function checkProvenance(file, collection, c) {
   const rows = [...(c.rows ?? []), ...(c.benchmarks ?? [])];
   for (const row of rows) {
-    if (!row.status) fail(file, `benchmark row for "${row.model}" has no provenance status`);
+    checkStatusValue(file, {
+      label: `benchmark row "${row.gpu}" (${row.model})`,
+      value: row.status,
+      legal: BENCHMARK_STATUSES,
+    });
     if (typeof row.tokensPerSec !== 'number' || Number.isNaN(row.tokensPerSec))
       fail(file, `benchmark row for "${row.model}" has a non-numeric tokensPerSec`);
     if (!row.runtime) fail(file, `benchmark row for "${row.model}" does not state a runtime`);
@@ -353,6 +382,14 @@ function checkVerticalB(file, collection, c) {
       if (!artifact.caption?.trim()) fail(file, `artifact "${artifact.label}" has no caption`);
       if (artifact.url && !artifact.url.startsWith('https://'))
         fail(file, `artifact "${artifact.label}" has a non-https URL`);
+    }
+
+    for (const result of c.results ?? []) {
+      checkStatusValue(file, {
+        label: `build result "${result.metric}"`,
+        value: result.provenance,
+        legal: BUILD_RESULT_STATUSES,
+      });
     }
 
     if (c.status === 'published') {

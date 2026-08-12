@@ -20,9 +20,14 @@ const BRAND = {
 export const site: SiteConfig = {
   name: BRAND.name,
   shortName: BRAND.name,
-  tagline: 'Local AI hardware, measured not guessed.',
+  // Renders in the homepage <title> as "FieldChecked — <tagline>". Repositioned
+  // alongside description/blurb: the old one named only the hardware vertical.
+  tagline: 'Benchmarks and builds, with receipts.',
+  // Used as the meta description, the OG description, the WebSite and
+  // Organization JSON-LD description, AND the homepage hero paragraph — so it
+  // has to read as body copy, not just as a SERP snippet.
   description:
-    'Benchmark-driven reviews, comparisons and tokens/sec data for people building local AI rigs. Real numbers from real hardware, plus honest roundups of what the community actually reports.',
+    'Field-tested AI for people who actually ship. Benchmarks from hardware we own, tools we built for real businesses, and the receipts for both.',
   url: BRAND.origin,
   locale: 'en_US',
   titleTemplate: `%s | ${BRAND.name}`,
@@ -38,8 +43,14 @@ export const site: SiteConfig = {
     { label: 'Blog', href: '/blog/' },
   ],
   footer: {
+    // The second sentence is load-bearing: it is the brand promise and it
+    // answers "why does this table say pending-verification" before a reader
+    // asks. Phrased as what the labels mean rather than "every number here was
+    // measured", because 27 rows are currently pending and this blurb renders
+    // on those pages too — a promise the page visibly contradicts is worse than
+    // no promise.
     blurb:
-      'FieldChecked publishes tokens/sec measurements from a working local AI rig, comparison data for GPU buying decisions, and clearly-labelled roundups of community consensus. Every number carries its provenance.',
+      'Measured means reproduced firsthand. Shipped means shipped. Anything community-reported or still unverified is labelled as such, on the row.',
     columns: [
       {
         heading: 'Data',
