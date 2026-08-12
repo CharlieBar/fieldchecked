@@ -1,0 +1,33 @@
+{
+  "name": "fieldchecked",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "qa:content": "node scripts/qa-content.mjs",
+    "qa": "npm run typecheck && npm run qa:content",
+    "pipeline:scout": "node scripts/scout-topics.mjs",
+    "pipeline:draft": "node scripts/draft-post.mjs",
+    "pipeline:seo": "node scripts/seo-qa-pass.mjs",
+    "pipeline:log": "node scripts/checkpoint-log.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "next": "^15.5.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.13",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^5.8.3"
+  }
+}
