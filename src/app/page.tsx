@@ -37,7 +37,7 @@ export default function HomePage() {
     <>
       <JsonLd
         data={buildSiteSchema({
-          listName: 'Latest from FieldChecked',
+          listName: `Latest from ${site.name}`,
           itemList: everything.slice(0, 10).map((item) => ({
             name: item.hero.headline,
             description: item.seo.description,

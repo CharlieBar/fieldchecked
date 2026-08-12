@@ -147,7 +147,7 @@ export function Faqs({ faqs }: { faqs: { question: string; answer: string }[] })
 
 export function RelatedLinks({
   paths,
-  heading = 'Related on FieldChecked',
+  heading = `Related on ${site.name}`,
   lookup,
 }: {
   paths: string[];

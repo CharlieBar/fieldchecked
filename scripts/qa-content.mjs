@@ -7,9 +7,14 @@
  * is a fact the build can check rather than a claim in a commit message. This
  * is step 5 of the pipeline (§8) and gates the PR in CI.
  *
- *   node scripts/qa-content.mjs [--json]
+ *   node scripts/qa-content.mjs [--json] [--allow-bulk-promotion]
  *
  * Exit code 1 on any error. Warnings never fail the build.
+ *
+ * Beyond the per-file rules it also runs two repo-wide release guards from
+ * scripts/lib/release-guards.mjs: the publish-cadence cap (max 3 pages moved
+ * to published per release) and the single-source-of-truth check on the brand
+ * name and canonical origin.
  *
  * Content files are loaded directly: each one imports only types, so Node's
  * type stripping erases the import entirely and the module is self-contained.
@@ -17,6 +22,11 @@
 import { readdir } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
+import {
+  MAX_PROMOTIONS,
+  checkPromotionCap,
+  checkSingleSourceOfTruth,
+} from './lib/release-guards.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const CONTENT_DIR = path.join(ROOT, 'src', 'content');
@@ -276,11 +286,54 @@ for (const { file, collection, content } of all) {
 
 const published = all.filter((entry) => entry.content.status === 'published').length;
 
+/* ------------------------------------------------------------------ */
+/* Repo-wide release guards                                            */
+/* ------------------------------------------------------------------ */
+
+const allowBulk =
+  process.argv.includes('--allow-bulk-promotion') || process.env.ALLOW_BULK_PROMOTION === '1';
+
+const { site } = await import(pathToFileURL(path.join(ROOT, 'src', 'content', 'global', 'site.ts')).href);
+
+for (const problem of await checkSingleSourceOfTruth({ cwd: ROOT, site })) {
+  fail(problem.file, problem.message);
+}
+
+const promotion = await checkPromotionCap({ cwd: ROOT, allowBulk });
+for (const message of promotion.errors) fail('release', message);
+
 if (process.argv.includes('--json')) {
-  console.log(JSON.stringify({ errors, warnings, checked: all.length, published }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        errors,
+        warnings,
+        checked: all.length,
+        published,
+        promotions: promotion.promotions,
+        promotionCap: MAX_PROMOTIONS,
+        promotionCheckSkipped: promotion.skipped ? promotion.reason : false,
+      },
+      null,
+      2,
+    ),
+  );
 } else {
   for (const { file, message } of warnings) console.log(`  warn  ${file}: ${message}`);
   for (const { file, message } of errors) console.log(`  ERROR ${file}: ${message}`);
+
+  if (promotion.skipped) {
+    console.log(`  note  promotion cap: ${promotion.reason}`);
+  } else {
+    for (const note of promotion.notes) console.log(`  note  promotion cap: ${note}`);
+    const verb = allowBulk && promotion.promotions.length > MAX_PROMOTIONS ? ' (override active)' : '';
+    console.log(
+      `  note  this branch publishes ${promotion.promotions.length} page(s), cap ${MAX_PROMOTIONS}${verb}`,
+    );
+    for (const item of promotion.promotions) {
+      console.log(`          · ${item.file} (${item.kind})`);
+    }
+  }
 
   console.log(
     `\n${all.length} content files checked · ${published} published · ` +

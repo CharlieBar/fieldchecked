@@ -81,6 +81,23 @@ stricter than the SEO rules and are not negotiable at all.
   benchmark data and community reports blur together on the same page. The URL
   split (`/benchmarks/` vs `/verdict/`) exists to keep them apart.
 
+## Brand and domain
+
+`src/content/global/site.ts` is the single source of truth for both. They live in
+one `BRAND` constant at the top of that file, and every absolute URL on the site —
+canonicals, JSON-LD `publisher`/`url`/`@id`, the sitemap, robots.txt — derives
+from it.
+
+The current origin is `https://fieldchecked.netlify.app`. **This Netlify
+subdomain is temporary.** When a custom domain is attached, `BRAND.origin` in
+`site.ts` is the only file that should need to change; everything else follows.
+The one deliberate exception is `contactEmail`, which needs a real mail domain
+regardless of where the site is served from.
+
+`npm run qa:content` fails the build if the origin or the brand name is
+duplicated anywhere outside `site.ts` (brand strings in reader-facing prose under
+`src/content/` are fine; brand strings in `src/app/` or `src/components/` are not).
+
 ## Working on content
 
 Adding a page is two steps: create the file under the right pillar, register it in
@@ -88,6 +105,41 @@ Adding a page is two steps: create the file under the right pillar, register it 
 
 New content ships as `status: 'draft'` and is promoted to `'published'` only at
 Checkpoint 3, after its numbers have been verified.
+
+## Release procedure — publish at most 3 pages per release
+
+**Maximum 2–3 pages may move from `draft` to `published` per week, each in its own
+commit.** This is enforced in CI, not just documented.
+
+Why it is a hard rule: a burst of new URLs indexed on the same day makes it
+impossible to attribute a ranking or citation change to any individual page. The
+first experiment cycle would produce numbers nobody can interpret. Staggering the
+release is also itself the publish-cadence-vs-indexing-speed experiment, which is
+why the dates in the promotion log matter.
+
+For each promotion:
+
+1. Verify the page — every benchmark row reproduced on the rig and moved to
+   `status: 'measured'`, or dropped. Every `/verdict/` source opened and confirmed
+   to be a deep link to a specific thread.
+2. Flip `status` to `'published'` in that page's content file. **One page per
+   commit.**
+3. Add a row to the promotion log in `EXPERIMENT-LOG.md`: date, URL, which rows
+   became `measured`.
+4. `npm run qa` — the cadence guard reports what the branch publishes and fails
+   above the cap.
+
+Work the pages in the order set by the verification queue in `EXPERIMENT-LOG.md`,
+which is ranked by commercial intent. Do not reorder it for convenience.
+
+**Override.** If a burst is genuinely intentional, run
+`npm run qa:content -- --allow-bulk-promotion` (or set `ALLOW_BULK_PROMOTION=1`)
+and record the reason in `EXPERIMENT-LOG.md`. The default is a hard fail; reach
+for the override deliberately, not to get a red build green.
+
+The one automatic exemption is the initial launch: if the base branch contains no
+content pages at all, there is no prior state to attribute against, so the cap
+does not apply. That can only ever happen once.
 
 ## Working on design
 
@@ -109,6 +161,29 @@ Log what each checkpoint caught (`npm run pipeline:log`) — the record of which
 checkpoints catch things and which rubber-stamp is a primary output of this
 experiment, and it is what decides which ones are safe to loosen on the
 production business sites later.
+
+### CI must run on pipeline-authored PRs
+
+The validator exists to catch what a rubber-stamped Checkpoint 2 misses, which
+makes automated PRs the case it most needs to cover. Two GitHub behaviours work
+against that, and `.github/workflows/content-qa.yml` is shaped around both:
+
+- **A PR opened by a workflow using the default `GITHUB_TOKEN` does not trigger
+  further workflow runs.** GitHub suppresses them to prevent recursion. An
+  `on: pull_request`-only workflow therefore never runs on bot-opened PRs, and
+  fails open — there is no red check, just no check.
+- A `push` trigger scoped to `main` misses the pipeline branch entirely.
+
+The workflow therefore runs on `push: branches: ['**']` as well as
+`pull_request`, so the validator runs against the commit regardless of who
+pushed it or whether a PR exists. **Do not narrow that trigger, and do not add an
+`if:` actor filter** — either change reopens the hole. If the pipeline is
+switched to opening PRs with a PAT or GitHub App token, both triggers fire; the
+redundancy is intentional.
+
+`fetch-depth: 0` on checkout is load-bearing: the cadence guard diffs against the
+base branch, and under CI it fails hard rather than skipping when it cannot
+resolve one, so a shallow checkout cannot silently disable the cap.
 
 ## Deviations from the original brief
 

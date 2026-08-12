@@ -14,6 +14,7 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 import { appendFile, mkdir, readFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 
 export const ROOT = path.resolve(import.meta.dirname, '..', '..');
@@ -24,6 +25,18 @@ export const MODELS = {
   draft: 'claude-sonnet-5',
   qa: 'claude-opus-5',
 };
+
+/**
+ * Read the brand from the content layer rather than repeating it in prompts.
+ * site.ts imports only a type, so Node's type stripping loads it directly and
+ * the scripts never hold a second copy of the name or the domain.
+ */
+export async function loadSite() {
+  const module = await import(
+    pathToFileURL(path.join(ROOT, 'src', 'content', 'global', 'site.ts')).href
+  );
+  return module.site;
+}
 
 export function client() {
   if (!process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_AUTH_TOKEN) {
@@ -41,8 +54,8 @@ export function client() {
  * model must not quietly drop — the experiment only measures anything if the
  * format requirements are actually present on every page.
  */
-export const HOUSE_RULES = `
-FieldChecked house rules — these are hard requirements, not preferences:
+export const houseRules = (brand) => `
+${brand} house rules — these are hard requirements, not preferences:
 
 1. Provenance. Every numeric claim carries a status: 'measured' (reproduced on
    our own rig), 'pending-verification', 'community-reported', or

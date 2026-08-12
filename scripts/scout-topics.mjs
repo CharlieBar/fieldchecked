@@ -11,12 +11,13 @@
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 import {
-  HOUSE_RULES,
   MODELS,
   ROOT,
   checkpointBanner,
   client,
   generateStructured,
+  houseRules,
+  loadSite,
   logCheckpoint,
 } from './lib/pipeline.mjs';
 
@@ -87,9 +88,10 @@ async function existingSlugs() {
   return listing;
 }
 
+const site = await loadSite();
 const published = await existingSlugs();
 
-const prompt = `We publish at FieldChecked, a benchmark-driven site about local AI hardware:
+const prompt = `We publish at ${site.name}, a benchmark-driven site about local AI hardware:
 GPU reviews, comparisons, setup guides, tokens/sec datasets, curated community
 verdicts, and news explainers.
 
@@ -112,7 +114,7 @@ const anthropic = client();
 const { data, raw } = await generateStructured({
   anthropic,
   model: MODELS.scout,
-  system: `You scout topics for a small, honest technical publication.\n\n${HOUSE_RULES}`,
+  system: `You scout topics for a small, honest technical publication.\n\n${houseRules(site.name)}`,
   prompt,
   schema: SCHEMA,
 });

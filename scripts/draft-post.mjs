@@ -14,12 +14,13 @@
 import { access, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
-  HOUSE_RULES,
   MODELS,
   ROOT,
   checkpointBanner,
   client,
   generate,
+  houseRules,
+  loadSite,
   logCheckpoint,
   readRepoFile,
 } from './lib/pipeline.mjs';
@@ -56,6 +57,8 @@ try {
   // Good — the file does not exist yet.
 }
 
+const site = await loadSite();
+
 // The type definitions are the spec. Handing them over verbatim beats
 // describing the shape in prose and then hoping the description stayed current.
 const types = await readRepoFile('src/types/content.ts');
@@ -88,10 +91,10 @@ const EXPORT_NAME = {
 
 const today = new Date().toISOString().slice(0, 10);
 
-const system = `You write content files for FieldChecked, a benchmark-driven publication
+const system = `You write content files for ${site.name}, a benchmark-driven publication
 about local AI hardware. You produce TypeScript source, not prose.
 
-${HOUSE_RULES}
+${houseRules(site.name)}
 
 The content contract you must satisfy:
 

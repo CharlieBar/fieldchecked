@@ -12,12 +12,13 @@
  */
 import path from 'node:path';
 import {
-  HOUSE_RULES,
   MODELS,
   ROOT,
   checkpointBanner,
   client,
   generateStructured,
+  houseRules,
+  loadSite,
   logCheckpoint,
   readRepoFile,
 } from './lib/pipeline.mjs';
@@ -66,12 +67,13 @@ const SCHEMA = {
   additionalProperties: false,
 };
 
+const site = await loadSite();
 const content = await readRepoFile(fileArg);
 const types = await readRepoFile('src/types/content.ts');
 
-const system = `You review content files for FieldChecked before publication.
+const system = `You review content files for ${site.name} before publication.
 
-${HOUSE_RULES}
+${houseRules(site.name)}
 
 The content contract:
 
