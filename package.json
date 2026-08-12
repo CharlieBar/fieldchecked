@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "qa:content": "node scripts/qa-content.mjs",
+    "qa:content": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/qa-content.mjs",
     "qa": "npm run typecheck && npm run qa:content",
     "pipeline:scout": "node scripts/scout-topics.mjs",
     "pipeline:draft": "node scripts/draft-post.mjs",
@@ -23,6 +23,7 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.116.0",
     "@tailwindcss/postcss": "^4.1.13",
     "@types/node": "^22.15.0",
     "@types/react": "^19.1.0",

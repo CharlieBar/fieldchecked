@@ -29,8 +29,10 @@ const author: JsonLdNode = {
 export function breadcrumbSchema(
   trail: { name: string; path: string }[],
 ): JsonLdNode {
+  const last = trail[trail.length - 1];
   return {
     '@type': 'BreadcrumbList',
+    '@id': `${absoluteUrl(last?.path ?? '/')}#breadcrumb`,
     itemListElement: trail.map((crumb, index) => ({
       '@type': 'ListItem',
       position: index + 1,
@@ -110,7 +112,9 @@ function articleSchema(content: AnyContent, trail: { name: string; path: string 
     author,
     publisher,
     inLanguage: 'en-US',
-    breadcrumb: breadcrumbSchema(trail),
+    // Reference rather than inline: the BreadcrumbList is its own node in the
+    // graph, and emitting it twice would duplicate every ListItem.
+    breadcrumb: { '@id': `${absoluteUrl(trail[trail.length - 1]?.path ?? '/')}#breadcrumb` },
   };
 
   if (content.schema.about?.length) {

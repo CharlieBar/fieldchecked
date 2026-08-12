@@ -1,0 +1,33 @@
+name: Content QA
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  qa:
+    name: Typecheck, validate content, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # Enforces the format rules from the brief: 8+ FAQs, quick answer present,
+      # schema declared, canonical matches the route, no published page carrying
+      # unverified numbers, verdict sources are deep links. See scripts/qa-content.mjs.
+      - name: Validate content
+        run: npm run qa:content
+
+      - name: Build
+        run: npm run build
