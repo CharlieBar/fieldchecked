@@ -54,13 +54,20 @@ environment variable is set in Netlify rather than committed:
 | Variable | Purpose |
 |---|---|
 | `GOOGLE_SITE_VERIFICATION` | Search Console ownership token. Rendered as `<meta name="google-site-verification">` by `src/app/layout.tsx`. Absent locally, so dev builds omit the tag. Read at build time — changing it needs a redeploy, not just a save. |
-| `PLAUSIBLE_DOMAIN` | Analytics. Renders the Plausible `<script defer>` in `<head>`. Set on the **production context only**, so branch deploys and previews never pollute the numbers. Must match the domain registered in the Plausible dashboard exactly, or events are dropped. |
+| `PLAUSIBLE_SCRIPT_ID` | Analytics. The per-site script ID Plausible issues (`pa-…`), which becomes `https://plausible.io/js/<id>.js`. Set on the **production context only**, so branch deploys and previews never pollute the numbers. Not a secret — it is visible in the HTML of any site running Plausible — but it stays an env var because its presence is also the preview/production gate. |
 
-Analytics is a plain deferred `<script>`, not `next/script`, which would pull its
-own client runtime into the bundle. Verified: adding it left per-route JS at
-210 B and First Load at 106 kB, both unchanged. Keep it that way — this site
-measures how content structure performs, and a heavier page measures the tag
-instead.
+Analytics is two plain `<script>` tags, not `next/script`, which would pull its
+own client runtime into the bundle. Measured: per-route JS 210 B and First Load
+106 kB, identical with and without it. Only the HTML grows, by ~670 B per page.
+Keep it that way — this site measures how content structure performs, and a
+heavier page measures the tag instead.
+
+**Do not swap `async` for `defer` on the external script.** The current snippet
+identifies the site by script URL and pairs the async load with an inline init
+that installs the `window.plausible` queue synchronously, so events fired before
+the script lands are buffered rather than dropped. `defer` would make that init
+pointless. Both tags come from Plausible verbatim; re-copy them from the
+dashboard rather than hand-editing if the format changes again.
 
 Ownership is proved **two** ways on purpose — Google treats either as sufficient,
 and keeping both means losing one does not unverify the property:
