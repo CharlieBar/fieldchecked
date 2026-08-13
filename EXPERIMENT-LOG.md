@@ -250,31 +250,31 @@ log below, so time-to-index can be attributed per page.
 
 ### Search Console property structure
 
-The root property is **verified and live** (2026-08-13). The seven per-pillar
-sub-properties below are **specified but not yet created** — creating a Search
-Console property requires an interactive Google session, which no script here
-can do.
+All eight properties are **live as of 2026-08-13**, created before any further
+content shipped — so no pillar has a window of history missing from its own
+property. Retroactive creation does not backfill, so this was the cheapest it
+was ever going to be.
 
-Create them before any further content ships. Retroactive creation does not
-backfill: a property added later permanently loses the window before it
-existed. Right now the data being lost is zero, which is the cheapest this will
-ever be.
+Creation was done by hand: a Search Console property requires an interactive
+Google session, which nothing in this repo can do. Recorded here on the site
+owner's confirmation, the same standard the data rules apply to `measured` rows —
+a human states it, not a script.
 
 | Property | Vertical | Status |
 |---|---|---|
 | `https://fieldchecked.netlify.app/` | root — both | **verified 2026-08-13** |
-| `https://fieldchecked.netlify.app/reviews/` | A | _pending creation_ |
-| `https://fieldchecked.netlify.app/vs/` | A | _pending creation_ |
-| `https://fieldchecked.netlify.app/benchmarks/` | A | _pending creation_ |
-| `https://fieldchecked.netlify.app/verdict/` | A | _pending creation_ |
-| `https://fieldchecked.netlify.app/builds/` | B | _pending creation_ |
-| `https://fieldchecked.netlify.app/studio/` | B | _pending creation_ |
-| `https://fieldchecked.netlify.app/experiments/` | B | _pending creation_ |
+| `https://fieldchecked.netlify.app/reviews/` | A | created 2026-08-13 |
+| `https://fieldchecked.netlify.app/vs/` | A | created 2026-08-13 |
+| `https://fieldchecked.netlify.app/benchmarks/` | A | created 2026-08-13 |
+| `https://fieldchecked.netlify.app/verdict/` | A | created 2026-08-13 |
+| `https://fieldchecked.netlify.app/builds/` | B | created 2026-08-13 |
+| `https://fieldchecked.netlify.app/studio/` | B | created 2026-08-13 |
+| `https://fieldchecked.netlify.app/experiments/` | B | created 2026-08-13 |
 
-Once created, this makes the never-aggregate-the-two-verticals rule **structural
-at the reporting layer** rather than a filter someone has to remember to apply:
-reading one number across both verticals would require deliberately combining
-two properties, instead of being the default view. `/guides/` and `/blog/` serve both
+This makes the never-aggregate-the-two-verticals rule **structural at the
+reporting layer** rather than a filter someone has to remember to apply: reading
+one number across both verticals now requires deliberately combining two
+properties, instead of being the default view. `/guides/` and `/blog/` serve both
 verticals and are tagged per page, so they stay in the root property and are
 attributed by their `vertical` field rather than by URL.
 
