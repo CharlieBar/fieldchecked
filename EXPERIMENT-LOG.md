@@ -236,26 +236,31 @@ log below, so time-to-index can be attributed per page.
 
 ### Search Console property structure
 
-One root property plus seven per-pillar sub-properties, created 2026-08-13
-before any further content shipped. Retroactive creation does not backfill, so
-a property created later permanently loses the window before it existed — which
-is why these were created while the data being lost was zero.
+The root property is **verified and live** (2026-08-13). The seven per-pillar
+sub-properties below are **specified but not yet created** — creating a Search
+Console property requires an interactive Google session, which no script here
+can do.
 
-| Property | Vertical |
-|---|---|
-| `https://fieldchecked.netlify.app/` | root — both |
-| `https://fieldchecked.netlify.app/reviews/` | A |
-| `https://fieldchecked.netlify.app/vs/` | A |
-| `https://fieldchecked.netlify.app/benchmarks/` | A |
-| `https://fieldchecked.netlify.app/verdict/` | A |
-| `https://fieldchecked.netlify.app/builds/` | B |
-| `https://fieldchecked.netlify.app/studio/` | B |
-| `https://fieldchecked.netlify.app/experiments/` | B |
+Create them before any further content ships. Retroactive creation does not
+backfill: a property added later permanently loses the window before it
+existed. Right now the data being lost is zero, which is the cheapest this will
+ever be.
 
-This makes the never-aggregate-the-two-verticals rule **structural at the
-reporting layer** rather than a filter someone has to remember to apply. Reading
-one number across both verticals now requires deliberately combining two
-properties, instead of being the default view. `/guides/` and `/blog/` serve both
+| Property | Vertical | Status |
+|---|---|---|
+| `https://fieldchecked.netlify.app/` | root — both | **verified 2026-08-13** |
+| `https://fieldchecked.netlify.app/reviews/` | A | _pending creation_ |
+| `https://fieldchecked.netlify.app/vs/` | A | _pending creation_ |
+| `https://fieldchecked.netlify.app/benchmarks/` | A | _pending creation_ |
+| `https://fieldchecked.netlify.app/verdict/` | A | _pending creation_ |
+| `https://fieldchecked.netlify.app/builds/` | B | _pending creation_ |
+| `https://fieldchecked.netlify.app/studio/` | B | _pending creation_ |
+| `https://fieldchecked.netlify.app/experiments/` | B | _pending creation_ |
+
+Once created, this makes the never-aggregate-the-two-verticals rule **structural
+at the reporting layer** rather than a filter someone has to remember to apply:
+reading one number across both verticals would require deliberately combining
+two properties, instead of being the default view. `/guides/` and `/blog/` serve both
 verticals and are tagged per page, so they stay in the root property and are
 attributed by their `vertical` field rather than by URL.
 
