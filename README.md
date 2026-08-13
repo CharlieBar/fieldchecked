@@ -48,7 +48,18 @@ produces a site where those are silently inert, so deploys go through git:
 push to main → Netlify builds (npm run build) → deploy
 ```
 
-Build settings come from `netlify.toml` and need no dashboard configuration.
+Build settings come from `netlify.toml` and need no dashboard configuration. One
+environment variable is set in Netlify rather than committed:
+
+| Variable | Purpose |
+|---|---|
+| `GOOGLE_SITE_VERIFICATION` | Search Console ownership token. Rendered as `<meta name="google-site-verification">` by `src/app/layout.tsx`. Absent locally, so dev builds omit the tag. Read at build time — changing it needs a redeploy, not just a save. |
+
+Search Console is a **URL-prefix** property (`https://fieldchecked.netlify.app/`),
+not a Domain property: the latter needs a DNS TXT record on `netlify.app`, which
+is Netlify's zone. Per-pillar sub-properties exist so the two verticals are never
+read as one aggregate number — see the vertical-separation rule in `CLAUDE.md`.
+
 Content QA is enforced separately by `.github/workflows/content-qa.yml`, which
 runs on every branch — Netlify does not gate the deploy on it, so a red validator
 is a signal to revert, not a blocked publish.
