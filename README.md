@@ -55,6 +55,14 @@ environment variable is set in Netlify rather than committed:
 |---|---|
 | `GOOGLE_SITE_VERIFICATION` | Search Console ownership token. Rendered as `<meta name="google-site-verification">` by `src/app/layout.tsx`. Absent locally, so dev builds omit the tag. Read at build time — changing it needs a redeploy, not just a save. |
 
+Ownership is proved **two** ways on purpose — Google treats either as sufficient,
+and keeping both means losing one does not unverify the property:
+
+1. The meta tag above, which depends on the env var surviving every build.
+2. `public/google8d5146ff706a0f2a.html`, a static file with no build-time
+   dependency at all. Do not delete it, and do not "tidy" it into a
+   subdirectory — Google fetches it from the site root.
+
 Search Console is a **URL-prefix** property (`https://fieldchecked.netlify.app/`),
 not a Domain property: the latter needs a DNS TXT record on `netlify.app`, which
 is Netlify's zone. Per-pillar sub-properties exist so the two verticals are never
