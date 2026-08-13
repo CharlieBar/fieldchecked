@@ -146,6 +146,7 @@ Copy this row for each change:
 | 2026-08-12 | Canonical origin set to `https://fieldchecked.netlify.app`; brand and origin consolidated behind a single `BRAND` constant in `site.ts`, enforced by a CI guard. | A domain move later should be a one-line edit, not a grep-and-pray. | No functional metric — verified by the guard, which fails the build if either value is duplicated anywhere else. | n/a — structural |
 | 2026-08-12 | Publish cadence capped at 3 pages per release, enforced in CI (`scripts/lib/release-guards.mjs`). | A 12-URL index burst would make it impossible to attribute a ranking change to any single page, destroying the first experiment cycle. Staggered release doubles as the cadence-vs-indexing-speed test. | Time from merge to first impression, per page. With staggered releases this is measurable per URL; with a burst it is not. | _pending_ |
 | 2026-08-13 | Site deployed to Netlify (project `fieldchecked`) and verified in Search Console as a URL-prefix property on `https://fieldchecked.netlify.app/`. Ownership proved by HTML file (`public/google8d5146ff706a0f2a.html`), with the meta tag live as a second method. | No ranking hypothesis — this is the instrument, not an experiment. Until GSC is collecting, every later entry has no metric to read. | Impressions, clicks and indexed-page count begin accumulating from this date. The zero baseline is now genuinely captured rather than reconstructed. | Sitemap submitted and read the same day: **Success, 18 discovered** — matching the build exactly. Confirms in production that the 15 drafts are excluded structurally by `status`, not just in local builds. Day 0 for the promotion log's time-to-impression column. |
+| 2026-08-13 | Plausible analytics wired site-wide via `PLAUSIBLE_DOMAIN`, as a plain deferred `<script>` in `<head>` — not `next/script`, which would pull its own runtime into the bundle. Measured: per-route JS unchanged at 210 B, First Load unchanged at 106 kB. | GSC and Plausible answer different halves of the same question and neither substitutes for the other. GSC covers everything up to the click — impressions, queries, position — and goes silent at the moment of arrival. Plausible covers everything after it. A page can win impressions and lose readers, or the reverse, and only both instruments together distinguish those. | Sessions, entry pages, and bounce/engagement per pillar, read against GSC impressions for the same URLs. | _pending live confirmation_ |
 
 ### Hardware record correction — 2026-08-12
 
@@ -188,6 +189,78 @@ them.
 The three cards form a ladder — 8GB, then two 16GB cards at different bandwidth —
 which maps onto the highest-intent query in the queue. That is a better spine for
 the content than the original scattered lineup, and it is fully verifiable.
+
+### No-intervention window — 2026-08-13 to 2026-09-03
+
+**No SEO interventions of any kind before 2026-09-03.** No title rewrites, no
+schema changes, no internal-linking edits, no "quick fixes" to pages that look
+underperforming. Content may be *verified and promoted* on the normal cadence —
+that is the planned variable — but nothing already published gets changed.
+
+**A flat line during this window is the expected and correct reading, not a
+fault to debug.** Six indexable pages on a three-week-old origin produce almost
+no data by construction. The baseline was captured cleanly on 2026-08-13; the
+only way to lose it is to start changing things in week two because the graph
+looks empty.
+
+That impulse is the actual failure mode this entry exists to head off. It will
+feel like diligence. It is contamination: every change made inside the window
+becomes a confound that cannot be separated afterwards from the natural
+indexing curve, and the first clean attribution cycle is gone. If a change feels
+urgent before 2026-09-03, the process is to write it down here as a dated
+proposal and ship it *after* the window, not to ship it and log it later.
+
+The one exception is a genuine defect — a page 404ing, a canonical pointing at
+the wrong origin, a validator failure reaching production. Fixing breakage is
+not an intervention. Improving performance is.
+
+### Discovered vs. indexed — recurring tracked metric
+
+| Date | Discovered | Indexable (in sitemap) | Indexed | Notes |
+|---|---|---|---|---|
+| 2026-08-13 | 18 | 6 | 0 | Baseline. Sitemap read same-day, `Success, 18 discovered`. Indexed count starts at zero by definition. |
+
+**Why this is tracked from day one:** the lag between *discovered* and *indexed*
+is the cheapest early signal available and it starts producing data weeks before
+any ranking does. It reports on the technical setup rather than on the content —
+whether the sitemap, canonicals, schema and render path are doing their job. If
+pages sit discovered-but-not-indexed for weeks, that is a crawl or quality
+signal worth acting on; if they index quickly, the plumbing is sound and any
+later ranking problem is a content problem.
+
+Note the 18/6 gap is expected, not a defect: 12 of the discovered URLs are hub
+and static routes. The 15 drafts are absent from both columns by design.
+
+**Record a row on every draft promotion from here on**, alongside the promotion
+log below, so time-to-index can be attributed per page.
+
+### Search Console property structure
+
+One root property plus seven per-pillar sub-properties, created 2026-08-13
+before any further content shipped. Retroactive creation does not backfill, so
+a property created later permanently loses the window before it existed — which
+is why these were created while the data being lost was zero.
+
+| Property | Vertical |
+|---|---|
+| `https://fieldchecked.netlify.app/` | root — both |
+| `https://fieldchecked.netlify.app/reviews/` | A |
+| `https://fieldchecked.netlify.app/vs/` | A |
+| `https://fieldchecked.netlify.app/benchmarks/` | A |
+| `https://fieldchecked.netlify.app/verdict/` | A |
+| `https://fieldchecked.netlify.app/builds/` | B |
+| `https://fieldchecked.netlify.app/studio/` | B |
+| `https://fieldchecked.netlify.app/experiments/` | B |
+
+This makes the never-aggregate-the-two-verticals rule **structural at the
+reporting layer** rather than a filter someone has to remember to apply. Reading
+one number across both verticals now requires deliberately combining two
+properties, instead of being the default view. `/guides/` and `/blog/` serve both
+verticals and are tagged per page, so they stay in the root property and are
+attributed by their `vertical` field rather than by URL.
+
+Ownership is inherited from the verified root property, so no sub-property needs
+its own verification.
 
 ### Promotion log
 

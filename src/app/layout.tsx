@@ -42,6 +42,22 @@ const jetbrainsMono = localFont({
  */
 const googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION;
 
+/*
+ * Plausible analytics. Same pattern as the verification token above: an env
+ * var, absent locally, so dev and preview builds send no events and the
+ * production numbers stay clean.
+ *
+ * Deliberately a plain <script defer> rather than next/script. next/script
+ * pulls its own client runtime into the bundle, and this site's whole premise
+ * is measuring how content structure performs — a heavier page would be
+ * measuring the analytics tag instead. `defer` keeps it off the critical
+ * rendering path: the browser fetches it in parallel and runs it after parse.
+ *
+ * Plausible over GA4 for this experiment specifically: no consent banner, so
+ * no extra variable on a site trying to hold everything else constant.
+ */
+const plausibleDomain = process.env.PLAUSIBLE_DOMAIN;
+
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
@@ -68,6 +84,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+      {plausibleDomain && (
+        <head>
+          <script defer data-domain={plausibleDomain} src="https://plausible.io/js/script.js" />
+        </head>
+      )}
       <body className="flex min-h-screen flex-col antialiased">
         <JsonLd data={buildSiteSchema()} />
         <a

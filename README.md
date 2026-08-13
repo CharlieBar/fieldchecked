@@ -54,6 +54,13 @@ environment variable is set in Netlify rather than committed:
 | Variable | Purpose |
 |---|---|
 | `GOOGLE_SITE_VERIFICATION` | Search Console ownership token. Rendered as `<meta name="google-site-verification">` by `src/app/layout.tsx`. Absent locally, so dev builds omit the tag. Read at build time — changing it needs a redeploy, not just a save. |
+| `PLAUSIBLE_DOMAIN` | Analytics. Renders the Plausible `<script defer>` in `<head>`. Set on the **production context only**, so branch deploys and previews never pollute the numbers. Must match the domain registered in the Plausible dashboard exactly, or events are dropped. |
+
+Analytics is a plain deferred `<script>`, not `next/script`, which would pull its
+own client runtime into the bundle. Verified: adding it left per-route JS at
+210 B and First Load at 106 kB, both unchanged. Keep it that way — this site
+measures how content structure performs, and a heavier page measures the tag
+instead.
 
 Ownership is proved **two** ways on purpose — Google treats either as sufficient,
 and keeping both means losing one does not unverify the property:
