@@ -48,13 +48,29 @@ produces a site where those are silently inert, so deploys go through git:
 push to main → Netlify builds (npm run build) → deploy
 ```
 
-Build settings come from `netlify.toml` and need no dashboard configuration. One
-environment variable is set in Netlify rather than committed:
+Build settings come from `netlify.toml` and need no dashboard configuration, and
+neither does anything else — **no environment variable has to be set for the
+site to work correctly.** That is a deliberate correction, not an accident of
+convenience. Both third-party tokens were originally env-var-only, and both
+silently rendered nothing in production because the variables never reached the
+build. Search Console verification survived only because the HTML file is
+committed; analytics simply did not run. A dependency that is invisible from the
+repo and fails without an error is worse than a public string in source.
 
-| Variable | Purpose |
-|---|---|
-| `GOOGLE_SITE_VERIFICATION` | Search Console ownership token. Rendered as `<meta name="google-site-verification">` by `src/app/layout.tsx`. Absent locally, so dev builds omit the tag. Read at build time — changing it needs a redeploy, not just a save. |
-| `PLAUSIBLE_SCRIPT_ID` | Analytics. The per-site script ID Plausible issues (`pa-…`), which becomes `https://plausible.io/js/<id>.js`. Set on the **production context only**, so branch deploys and previews never pollute the numbers. Not a secret — it is visible in the HTML of any site running Plausible — but it stays an env var because its presence is also the preview/production gate. |
+Both values are public by construction — each is served in the HTML of every
+site using them — so both are committed in `src/app/layout.tsx`, with an env var
+retained as an override:
+
+| Value | Override | Gate |
+|---|---|---|
+| Search Console token | `GOOGLE_SITE_VERIFICATION` | none — verification is origin-scoped, so the tag is inert on any other domain |
+| Plausible script ID | `PLAUSIBLE_SCRIPT_ID` | `CONTEXT === 'production'` |
+
+`CONTEXT` is set by Netlify itself on every build (`production`,
+`deploy-preview`, `branch-deploy`) and is unset locally, so previews, branch
+deploys and `npm run dev` emit no analytics and cannot pollute the numbers —
+without anyone configuring anything. Verified across all five cases, including
+the override.
 
 Analytics is two plain `<script>` tags, not `next/script`, which would pull its
 own client runtime into the bundle. Measured: per-route JS 210 B and First Load

@@ -40,7 +40,21 @@ const jetbrainsMono = localFont({
  * Set in the Netlify UI (or via MCP) as GOOGLE_SITE_VERIFICATION. Read at build
  * time on the server, so it never reaches the client bundle.
  */
-const googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION;
+const GOOGLE_SITE_VERIFICATION = 'uLbf11Tr1O4pqrgzjqKdHgMvF8U9D-EI6vWqwBHZvb4';
+
+/*
+ * Committed rather than env-var-only, deliberately. The token is public by
+ * construction — it is served in the HTML of every verified site — and the
+ * env-var version silently rendered nothing in production, leaving the HTML
+ * file as the only live proof of ownership. Two methods was the point; one
+ * method that works and one that quietly does not is worse than knowing.
+ *
+ * Not context-gated: verification is origin-scoped, so the tag is inert on
+ * preview domains anyway, and rendering it everywhere is the safer failure
+ * mode. The env var still overrides for a future origin.
+ */
+const googleSiteVerification =
+  process.env.GOOGLE_SITE_VERIFICATION ?? GOOGLE_SITE_VERIFICATION;
 
 /*
  * Plausible analytics. Same pattern as the verification token above: an env
@@ -68,7 +82,21 @@ const googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION;
  * Plausible over GA4 for this experiment specifically: no consent banner, so
  * no extra variable on a site trying to hold everything else constant.
  */
-const plausibleScriptId = process.env.PLAUSIBLE_SCRIPT_ID;
+const PLAUSIBLE_SCRIPT_ID = 'pa-z2FeKv56ueip4-7Zcj6jQ';
+
+/*
+ * Netlify sets CONTEXT itself on every build — 'production', 'deploy-preview'
+ * or 'branch-deploy' — so the gate needs no dashboard configuration and cannot
+ * be silently lost. That matters: the earlier env-var-only version rendered
+ * nothing in production for exactly that reason, and the failure was invisible
+ * from the repo. Locally CONTEXT is unset, so dev builds stay clean.
+ *
+ * PLAUSIBLE_SCRIPT_ID still overrides, so a second site or a rotated ID needs
+ * no code change.
+ */
+const plausibleScriptId =
+  process.env.PLAUSIBLE_SCRIPT_ID ??
+  (process.env.CONTEXT === 'production' ? PLAUSIBLE_SCRIPT_ID : undefined);
 
 /** Verbatim from Plausible's issued snippet. Buffers calls until the async script lands. */
 const PLAUSIBLE_INIT =
