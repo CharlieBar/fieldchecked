@@ -40,23 +40,67 @@ const jetbrainsMono = localFont({
  * Set in the Netlify UI (or via MCP) as GOOGLE_SITE_VERIFICATION. Read at build
  * time on the server, so it never reaches the client bundle.
  */
-const googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION;
+const GOOGLE_SITE_VERIFICATION = 'uLbf11Tr1O4pqrgzjqKdHgMvF8U9D-EI6vWqwBHZvb4';
+
+/*
+ * Committed rather than env-var-only, deliberately. The token is public by
+ * construction — it is served in the HTML of every verified site — and the
+ * env-var version silently rendered nothing in production, leaving the HTML
+ * file as the only live proof of ownership. Two methods was the point; one
+ * method that works and one that quietly does not is worse than knowing.
+ *
+ * Not context-gated: verification is origin-scoped, so the tag is inert on
+ * preview domains anyway, and rendering it everywhere is the safer failure
+ * mode. The env var still overrides for a future origin.
+ */
+const googleSiteVerification =
+  process.env.GOOGLE_SITE_VERIFICATION ?? GOOGLE_SITE_VERIFICATION;
 
 /*
  * Plausible analytics. Same pattern as the verification token above: an env
  * var, absent locally, so dev and preview builds send no events and the
  * production numbers stay clean.
  *
- * Deliberately a plain <script defer> rather than next/script. next/script
- * pulls its own client runtime into the bundle, and this site's whole premise
- * is measuring how content structure performs — a heavier page would be
- * measuring the analytics tag instead. `defer` keeps it off the critical
- * rendering path: the browser fetches it in parallel and runs it after parse.
+ * Holds the per-site script ID Plausible issues (e.g. "pa-xxxxxxxx"), not a
+ * domain — the current snippet format identifies the site by the script URL
+ * itself, so nothing is passed to the script at runtime. It is not a secret:
+ * it is visible in the HTML of every site running Plausible. It stays an env
+ * var anyway, because the variable's presence IS the preview/production gate —
+ * one mechanism doing both jobs rather than a hardcoded default plus a
+ * separate context check.
+ *
+ * Deliberately plain <script> tags rather than next/script. next/script pulls
+ * its own client runtime into the bundle, and this site's whole premise is
+ * measuring how content structure performs — a heavier page would be measuring
+ * the analytics tag instead.
+ *
+ * `async` is Plausible's specification here, not an oversight: the inline init
+ * below installs the window.plausible queue synchronously, so calls made
+ * before the external script finishes loading are buffered rather than
+ * dropped. Swapping in `defer` would remove the reason the init exists.
  *
  * Plausible over GA4 for this experiment specifically: no consent banner, so
  * no extra variable on a site trying to hold everything else constant.
  */
-const plausibleDomain = process.env.PLAUSIBLE_DOMAIN;
+const PLAUSIBLE_SCRIPT_ID = 'pa-z2FeKv56ueip4-7Zcj6jQ';
+
+/*
+ * Netlify sets CONTEXT itself on every build — 'production', 'deploy-preview'
+ * or 'branch-deploy' — so the gate needs no dashboard configuration and cannot
+ * be silently lost. That matters: the earlier env-var-only version rendered
+ * nothing in production for exactly that reason, and the failure was invisible
+ * from the repo. Locally CONTEXT is unset, so dev builds stay clean.
+ *
+ * PLAUSIBLE_SCRIPT_ID still overrides, so a second site or a rotated ID needs
+ * no code change.
+ */
+const plausibleScriptId =
+  process.env.PLAUSIBLE_SCRIPT_ID ??
+  (process.env.CONTEXT === 'production' ? PLAUSIBLE_SCRIPT_ID : undefined);
+
+/** Verbatim from Plausible's issued snippet. Buffers calls until the async script lands. */
+const PLAUSIBLE_INIT =
+  'window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()';
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -84,9 +128,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      {plausibleDomain && (
+      {plausibleScriptId && (
         <head>
-          <script defer data-domain={plausibleDomain} src="https://plausible.io/js/script.js" />
+          {/* Privacy-friendly analytics by Plausible */}
+          <script async src={`https://plausible.io/js/${plausibleScriptId}.js`} />
+          <script dangerouslySetInnerHTML={{ __html: PLAUSIBLE_INIT }} />
         </head>
       )}
       <body className="flex min-h-screen flex-col antialiased">

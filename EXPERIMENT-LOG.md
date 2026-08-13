@@ -146,7 +146,7 @@ Copy this row for each change:
 | 2026-08-12 | Canonical origin set to `https://fieldchecked.netlify.app`; brand and origin consolidated behind a single `BRAND` constant in `site.ts`, enforced by a CI guard. | A domain move later should be a one-line edit, not a grep-and-pray. | No functional metric — verified by the guard, which fails the build if either value is duplicated anywhere else. | n/a — structural |
 | 2026-08-12 | Publish cadence capped at 3 pages per release, enforced in CI (`scripts/lib/release-guards.mjs`). | A 12-URL index burst would make it impossible to attribute a ranking change to any single page, destroying the first experiment cycle. Staggered release doubles as the cadence-vs-indexing-speed test. | Time from merge to first impression, per page. With staggered releases this is measurable per URL; with a burst it is not. | _pending_ |
 | 2026-08-13 | Site deployed to Netlify (project `fieldchecked`) and verified in Search Console as a URL-prefix property on `https://fieldchecked.netlify.app/`. Ownership proved by HTML file (`public/google8d5146ff706a0f2a.html`), with the meta tag live as a second method. | No ranking hypothesis — this is the instrument, not an experiment. Until GSC is collecting, every later entry has no metric to read. | Impressions, clicks and indexed-page count begin accumulating from this date. The zero baseline is now genuinely captured rather than reconstructed. | Sitemap submitted and read the same day: **Success, 18 discovered** — matching the build exactly. Confirms in production that the 15 drafts are excluded structurally by `status`, not just in local builds. Day 0 for the promotion log's time-to-impression column. |
-| 2026-08-13 | Plausible analytics wired site-wide via `PLAUSIBLE_DOMAIN`, as a plain deferred `<script>` in `<head>` — not `next/script`, which would pull its own runtime into the bundle. Measured: per-route JS unchanged at 210 B, First Load unchanged at 106 kB. | GSC and Plausible answer different halves of the same question and neither substitutes for the other. GSC covers everything up to the click — impressions, queries, position — and goes silent at the moment of arrival. Plausible covers everything after it. A page can win impressions and lose readers, or the reverse, and only both instruments together distinguish those. | Sessions, entry pages, and bounce/engagement per pillar, read against GSC impressions for the same URLs. | _pending live confirmation_ |
+| 2026-08-13 | Plausible analytics wired site-wide as plain `<script>` tags in `<head>` — not `next/script`, which would pull its own runtime into the bundle. Measured: per-route JS unchanged at 210 B, First Load unchanged at 106 kB. **Corrected 2026-08-13** to Plausible's current issued snippet: per-site script ID in the URL rather than shared `script.js` + `data-domain`, plus the inline init that buffers events fired before the async script lands. Env var renamed `PLAUSIBLE_DOMAIN` → `PLAUSIBLE_SCRIPT_ID`, since the domain is no longer passed to the script at all. JS bundle unchanged by the correction; page HTML grew 411 B. **Second correction 2026-08-13:** live view-source showed neither the analytics script nor the GSC meta tag was rendering in production — the Netlify env vars never reached the build, and nothing errored. Both values are public by construction, so both are now committed in `layout.tsx`, with analytics gated on Netlify's own `CONTEXT === 'production'` rather than on a variable someone has to set. Search Console verification was never at risk only because the HTML-file method is committed to the repo. | GSC and Plausible answer different halves of the same question and neither substitutes for the other. GSC covers everything up to the click — impressions, queries, position — and goes silent at the moment of arrival. Plausible covers everything after it. A page can win impressions and lose readers, or the reverse, and only both instruments together distinguish those. | Sessions, entry pages, and bounce/engagement per pillar, read against GSC impressions for the same URLs. | **Confirmed working end to end 2026-08-13.** Tags verified in live view-source, then first pageview confirmed landing in Plausible (1 visitor, 2 pageviews). Analytics and Search Console are both live, so the zero baseline is captured by both instruments from this date. |
 
 ### Hardware record correction — 2026-08-12
 
@@ -214,6 +214,20 @@ The one exception is a genuine defect — a page 404ing, a canonical pointing at
 the wrong origin, a validator failure reaching production. Fixing breakage is
 not an intervention. Improving performance is.
 
+### Calendar risk — Plausible trial ends ~2026-09-12
+
+The Plausible account started on 2026-08-13 as a 30-day trial, so it lapses
+around **2026-09-12** — nine days *after* the no-intervention window closes,
+which is precisely when the data starts being worth reading. If it lapses
+unnoticed, analytics stops and the post-click half of the instrument goes dark
+during the first period that has any traffic in it.
+
+A gap here is not recoverable after the fact: unlike Search Console, which
+backfills nothing but keeps collecting regardless, a lapsed Plausible account
+simply stops recording. Decide on a plan before that date, or deliberately
+accept the gap and log it here as a decision rather than discovering it later
+as an anomaly in the numbers.
+
 ### Discovered vs. indexed — recurring tracked metric
 
 | Date | Discovered | Indexable (in sitemap) | Indexed | Notes |
@@ -236,24 +250,29 @@ log below, so time-to-index can be attributed per page.
 
 ### Search Console property structure
 
-One root property plus seven per-pillar sub-properties, created 2026-08-13
-before any further content shipped. Retroactive creation does not backfill, so
-a property created later permanently loses the window before it existed — which
-is why these were created while the data being lost was zero.
+All eight properties are **live as of 2026-08-13**, created before any further
+content shipped — so no pillar has a window of history missing from its own
+property. Retroactive creation does not backfill, so this was the cheapest it
+was ever going to be.
 
-| Property | Vertical |
-|---|---|
-| `https://fieldchecked.netlify.app/` | root — both |
-| `https://fieldchecked.netlify.app/reviews/` | A |
-| `https://fieldchecked.netlify.app/vs/` | A |
-| `https://fieldchecked.netlify.app/benchmarks/` | A |
-| `https://fieldchecked.netlify.app/verdict/` | A |
-| `https://fieldchecked.netlify.app/builds/` | B |
-| `https://fieldchecked.netlify.app/studio/` | B |
-| `https://fieldchecked.netlify.app/experiments/` | B |
+Creation was done by hand: a Search Console property requires an interactive
+Google session, which nothing in this repo can do. Recorded here on the site
+owner's confirmation, the same standard the data rules apply to `measured` rows —
+a human states it, not a script.
+
+| Property | Vertical | Status |
+|---|---|---|
+| `https://fieldchecked.netlify.app/` | root — both | **verified 2026-08-13** |
+| `https://fieldchecked.netlify.app/reviews/` | A | created 2026-08-13 |
+| `https://fieldchecked.netlify.app/vs/` | A | created 2026-08-13 |
+| `https://fieldchecked.netlify.app/benchmarks/` | A | created 2026-08-13 |
+| `https://fieldchecked.netlify.app/verdict/` | A | created 2026-08-13 |
+| `https://fieldchecked.netlify.app/builds/` | B | created 2026-08-13 |
+| `https://fieldchecked.netlify.app/studio/` | B | created 2026-08-13 |
+| `https://fieldchecked.netlify.app/experiments/` | B | created 2026-08-13 |
 
 This makes the never-aggregate-the-two-verticals rule **structural at the
-reporting layer** rather than a filter someone has to remember to apply. Reading
+reporting layer** rather than a filter someone has to remember to apply: reading
 one number across both verticals now requires deliberately combining two
 properties, instead of being the default view. `/guides/` and `/blog/` serve both
 verticals and are tagged per page, so they stay in the root property and are
