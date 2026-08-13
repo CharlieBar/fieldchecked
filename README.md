@@ -30,6 +30,29 @@ npm run dev        # http://localhost:3000
 The pipeline scripts need `ANTHROPIC_API_KEY` in the environment, or an
 `ant auth login` profile.
 
+## Deployment
+
+Hosted on Netlify as the project **`fieldchecked`**
+([dashboard](https://app.netlify.com/projects/fieldchecked)), serving
+`https://fieldchecked.netlify.app` — which is the value of `BRAND.origin` in
+`src/content/global/site.ts`. The project name and that constant have to agree;
+renaming one means renaming the other.
+
+Netlify runs the build itself rather than receiving a pre-built bundle. That is
+deliberate: `netlify.toml` declares `@netlify/plugin-nextjs`, and the plugin has
+to run inside Netlify's build for App Router routing, image optimisation and the
+ISR `revalidate` on `/benchmarks/` to work. Uploading a local `.next` directory
+produces a site where those are silently inert, so deploys go through git:
+
+```
+push to main → Netlify builds (npm run build) → deploy
+```
+
+Build settings come from `netlify.toml` and need no dashboard configuration.
+Content QA is enforced separately by `.github/workflows/content-qa.yml`, which
+runs on every branch — Netlify does not gate the deploy on it, so a red validator
+is a signal to revert, not a blocked publish.
+
 ## How the repo is organised
 
 Content and design are strictly separated: everything a reader reads lives in
