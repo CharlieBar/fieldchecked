@@ -28,6 +28,20 @@ const jetbrainsMono = localFont({
   fallback: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
 });
 
+/*
+ * Search Console ownership token, rendered as <meta name="google-site-verification">.
+ *
+ * Deliberately an env var rather than a field in site.ts: it is deployment
+ * configuration, not something a reader ever sees, and it is scoped to one
+ * origin — moving to a custom domain means a new GSC property and a new token,
+ * while site.ts stays the content layer's business. Absent locally, so dev and
+ * preview builds simply omit the tag.
+ *
+ * Set in the Netlify UI (or via MCP) as GOOGLE_SITE_VERIFICATION. Read at build
+ * time on the server, so it never reaches the client bundle.
+ */
+const googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION;
+
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
@@ -41,6 +55,9 @@ export const metadata: Metadata = {
   publisher: site.name,
   formatDetection: { telephone: false },
   robots: { index: true, follow: true },
+  ...(googleSiteVerification
+    ? { verification: { google: googleSiteVerification } }
+    : {}),
 };
 
 export const viewport: Viewport = {
