@@ -1,0 +1,138 @@
+@import 'tailwindcss';
+
+/*
+ * Terminal Noir — design tokens.
+ * DESIGN LAYER ONLY. Redesigns rewrite this file freely; nothing in
+ * src/content/ or src/types/ may be touched to change how the site looks.
+ */
+@theme {
+  --color-bg: #0b0e11;
+  --color-surface: #14181d;
+  --color-surface-2: #1a1f26;
+  --color-primary: #39ff88;
+  --color-secondary: #7c8b99;
+  --color-accent: #ff8a3d;
+  --color-text: #e7ecef;
+  --color-border: #23292f;
+
+  --font-display: var(--font-jetbrains-mono), ui-monospace, 'SFMono-Regular',
+    'Menlo', monospace;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', sans-serif;
+
+  --text-hero: clamp(2.25rem, 6vw, 4rem);
+  --text-section: clamp(1.5rem, 3vw, 2rem);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  /* Tabular figures everywhere numbers are compared column-to-column. */
+  table,
+  .numeric {
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-display);
+  }
+
+  ::selection {
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .prose-fc p {
+    margin-bottom: 1.15rem;
+    color: color-mix(in srgb, var(--color-text) 88%, transparent);
+  }
+
+  .prose-fc a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+
+  .prose-fc a:hover {
+    background-color: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  }
+
+  /* Sticky comparison-table headers, per the brief's table rules. */
+  .table-sticky thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--color-surface-2);
+  }
+}
+
+/* Subtle scroll fade-in. No scroll-jacking, and it degrades to plain
+   visible content when the user prefers reduced motion or JS is off. */
+@keyframes fc-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fc-rise {
+    animation: fc-rise 0.5s ease-out both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+}
+
+@keyframes fc-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.fc-ticker-track {
+  animation: fc-ticker 42s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-ticker-track {
+    animation: none;
+  }
+}

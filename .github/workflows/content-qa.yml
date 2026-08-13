@@ -1,0 +1,75 @@
+name: Content QA
+
+# Trigger coverage is deliberately broad, because the validator exists to catch
+# what a rubber-stamped Checkpoint 2 misses — which is exactly the case on
+# pipeline-authored changes. Two GitHub behaviours make a naive
+# `on: pull_request` insufficient:
+#
+#   1. A pull request opened by a workflow using the default GITHUB_TOKEN does
+#      NOT trigger further workflow runs. GitHub suppresses them to avoid
+#      recursion. A `pull_request`-only trigger therefore never runs on
+#      bot-opened PRs — silently, with a green (empty) check surface.
+#   2. `push: branches: [main]` only covers the default branch, so a pipeline
+#      branch pushed before the PR exists is unvalidated too.
+#
+# `push: branches: ['**']` closes both: the validator runs on the commit itself,
+# no matter who pushed it or whether a PR was ever opened. Keep it that way.
+#
+# Note: if the pipeline opens PRs with a PAT or GitHub App token instead, the
+# pull_request trigger fires normally and both runs happen — that is fine and
+# intentionally redundant.
+on:
+  pull_request:
+    # Defaults are opened/synchronize/reopened; ready_for_review is added so a
+    # PR that starts as a draft is revalidated when it is marked ready.
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: ['**']
+  merge_group:
+  workflow_dispatch:
+
+# Supersede stale runs of the same PR or branch, but never let a push run and
+# its PR run cancel each other — they use different group keys.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# Deliberately no `if:` actor filter and no fork exclusion. Any guard of the
+# form `if: github.actor != 'some-bot'` would reintroduce the hole this
+# workflow exists to close.
+jobs:
+  qa:
+    name: Typecheck, validate content, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The publish-cadence guard diffs this branch against its base, so it
+          # needs real history. The default shallow clone would leave it unable
+          # to resolve a base ref — which fails the build under CI rather than
+          # skipping, so a truncated checkout cannot silently disable the cap.
+          fetch-depth: 0
+
+      - name: Ensure base branch is available for the cadence guard
+        run: git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main || true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # Per-page format rules (8+ FAQs, quick answer, schema, canonical matches
+      # the route, no published page carrying unverified numbers, verdict
+      # sources are deep links) plus the repo-wide release guards: the
+      # max-3-pages publish cadence cap and the single-source-of-truth check on
+      # the brand name and canonical origin. See scripts/qa-content.mjs.
+      - name: Validate content and release guards
+        run: npm run qa:content
+
+      - name: Build
+        run: npm run build
