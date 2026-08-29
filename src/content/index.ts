@@ -51,11 +51,15 @@ import { studio as comfyuiInfographic } from './studio/comfyui-infographic-pipel
 
 /* -- experiments (Vertical B) -------------------------------------- */
 import { experiment as faqSchemaCitations } from './experiments/faq-schema-ai-citations';
+import { experiment as agentsSameTask } from './experiments/ai-coding-agents-same-task';
+import { experiment as subscriptionsEarnKeep } from './experiments/which-ai-subscription-earns-its-keep';
 
 /* -- blog ---------------------------------------------------------- */
 import { post as vramIsTheBottleneck } from './blog/vram-is-still-the-bottleneck';
 import { post as tokensPerSecondAlone } from './blog/tokens-per-second-is-not-enough';
 import { post as quantizationTradeoffs } from './blog/quantization-tradeoffs-explained';
+import { post as botPrNoChecks } from './blog/github-actions-no-checks-on-bot-pull-requests';
+import { post as analyticsNeverRunning } from './blog/analytics-that-was-never-running';
 
 export const reviews: ReviewContent[] = [
   rtx4080SuperLocalLlm,
@@ -85,12 +89,18 @@ export const verdicts: VerdictContent[] = [
 
 export const builds: BuildContent[] = [wordpressMcpServer];
 export const studioPipelines: StudioContent[] = [comfyuiInfographic];
-export const experiments: ExperimentContent[] = [faqSchemaCitations];
+export const experiments: ExperimentContent[] = [
+  faqSchemaCitations,
+  agentsSameTask,
+  subscriptionsEarnKeep,
+];
 
 export const posts: BlogContent[] = [
   vramIsTheBottleneck,
   tokensPerSecondAlone,
   quantizationTradeoffs,
+  botPrNoChecks,
+  analyticsNeverRunning,
 ];
 
 /* ------------------------------------------------------------------ */
