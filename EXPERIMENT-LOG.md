@@ -122,6 +122,64 @@ separately:
   published until this site has Search Console data, which requires the Vertical A
   pages to be indexed first. It is deliberately last.
 
+### Vertical B content queue
+
+Added 2026-08-29. Sequenced separately from the verification queue above because
+these are gated on artifacts and elapsed time rather than rig time, so they do
+not compete for the same resource.
+
+**Ready to publish — firsthand, already happened, no further input needed:**
+
+| # | Page | Target query | Gated on |
+|---|---|---|---|
+| B1 | `/blog/github-actions-no-checks-on-bot-pull-requests/` | github actions not running on pull request | nothing — publishable at Checkpoint 3 |
+| B2 | `/blog/analytics-that-was-never-running/` | analytics not tracking / env var missing at build | nothing — publishable at Checkpoint 3 |
+
+Both document failures that occurred in this repository, with commits and
+before/after served HTML as evidence. B1 is the strongest search target in the
+set: a real, recurring problem whose existing answers are scattered across
+GitHub issues.
+
+**Pre-registered — method fixed, no data yet:**
+
+| # | Page | Gated on |
+|---|---|---|
+| B3 | `/experiments/ai-coding-agents-same-task/` | running the identical task through each agent |
+| B4 | `/experiments/which-ai-subscription-earns-its-keep/` | a 30-day contemporaneous usage log |
+
+B3 and B4 are deliberately empty of findings. Both were written method-first so
+the analysis cannot be shaped around the outcome, and both carry the same
+`dataPoints: []` block the validator refuses to publish. **Neither may be filled
+in from recollection** — that is the specific failure each method exists to
+replace.
+
+**Not yet drafted:**
+
+- A piece on the provenance type system, and one on the publish-cadence guard.
+  Both have their artifacts already in this repo; neither is written.
+
+The three original Vertical B seeds and their blockers are listed in the section
+immediately above; they are not repeated here.
+
+### Deliberately not a news section
+
+Considered and rejected 2026-08-29: a running feed of new open-source model and
+tooling releases. Rejected on three grounds, recorded so the question does not
+get reopened by default.
+
+1. **It cannot be field-checked.** Reporting a release means republishing
+   vendor-claimed figures, which is the exact category the provenance rules
+   exist to quarantine.
+2. **It is a speed race this site loses by construction.** One operator cannot
+   beat established outlets to a release, and the traffic decays to nothing.
+3. **It would contaminate the measurement.** News has different query patterns
+   and decay curves from evergreen commercial-intent pages, and mixing them into
+   the same properties adds a large noisy variable to every reading.
+
+The retained version is news as an angle on firsthand testing — a release is the
+hook, a measurement on owned hardware is the payload — which keeps the timeliness
+without spending the brand on it.
+
 ### Practical sequencing note
 
 Intent order says publish #1–#3 first, but #1–#3 restate measurements that live
