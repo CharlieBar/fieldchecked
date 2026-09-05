@@ -374,6 +374,52 @@ listed articles are also unindexed, that suggests hub indexation and article
 indexation are moving together rather than independently — recorded as an
 observation to check next reading, not as a conclusion.
 
+### Intervention 1 — homepage stops promoting drafts (2026-09-05)
+
+**What changed.** `src/app/page.tsx` selected from `allContent()`, which includes
+drafts. It now selects from `publishedContent()`. Four leaks closed in one edit:
+the featured card, the latest grid, the ItemList structured data, and a hero CTA
+hardcoded to a draft buying guide (now derived from the hubs map, so the design
+layer holds no content references). The featured-dataset section now requires a
+published benchmark and therefore does not render at all — the honest state,
+since no benchmark is verified yet.
+
+The latest grid went from six to nine so that every published page is one click
+from the homepage while the published set is this small.
+
+**Before and after, homepage article links:**
+
+| | Before | After |
+|---|---|---|
+| Links to draft pages | 5 | **0** |
+| Links to published pages | 2 | **8** |
+| Draft URLs in ItemList JSON-LD | yes | **none** |
+| Never-crawled pages linked | 0 of 4 | **4 of 4** |
+
+**Why, and why this rather than a content change.** The homepage is the most
+crawled page on the site. For three weeks it spent that attention on pages
+carrying `noindex`: Google fetched ten drafts, hit the tag on every one, and
+never fetched four of the six published articles at all. Those four were absent
+from the homepage entirely. This is a plumbing fix — no content file was touched,
+and no page Google has never assessed was rewritten.
+
+**Hypothesis.** Redirecting internal links from unindexable to indexable pages
+shortens time-to-crawl for the four, independently of the manual index requests.
+
+**Confound to declare now:** manual index requests are being made in the same
+window, so if the four are crawled soon the two causes cannot be separated. That
+is an accepted trade — getting them indexed matters more here than attributing
+which lever did it. Recorded so the ambiguity is not discovered later and
+mistaken for a clean result.
+
+**Metric to watch:** days from 2026-09-05 to first crawl for each of the four,
+and whether the count of `Discovered - currently not indexed` falls from 7.
+
+**Left alone deliberately:** hub pages still list their drafts, and the section
+cards still count them. Drafts remain reachable and honestly labelled — the fix
+targets what the crawler is pointed at from the busiest page, not visibility of
+work in progress.
+
 ### Plausible: decision due before 2026-09-12
 
 The trial lapses in seven days. The data now says what it is buying: **4 visitors
