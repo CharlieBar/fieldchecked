@@ -2,9 +2,9 @@ import type { BlogContent } from '@/types/content';
 
 export const post: BlogContent = {
   slug: 'github-actions-no-checks-on-bot-pull-requests',
-  status: 'draft',
+  status: 'published',
   vertical: 'B',
-  datePublished: '2026-08-29',
+  datePublished: '2026-09-05',
   category: 'explainer',
   readingTimeMinutes: 6,
 
@@ -27,7 +27,7 @@ export const post: BlogContent = {
     headline: 'Your CI Does Not Run on Bot-Opened Pull Requests',
     subheadline:
       'GitHub suppresses workflow runs for PRs opened with the default token. The check does not fail — it never appears.',
-    lastUpdated: '2026-08-29',
+    lastUpdated: '2026-09-05',
   },
 
   quickAnswer:

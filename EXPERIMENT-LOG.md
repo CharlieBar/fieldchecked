@@ -346,4 +346,4 @@ table is the publish-cadence-vs-indexing-speed experiment.
 
 | Date | URL | Rows moved to `measured` | Days to first GSC impression |
 |---|---|---|---|
-| _(none yet — the 6 pages live at launch were never drafts)_ | | | |
+| 2026-09-05 | `/blog/github-actions-no-checks-on-bot-pull-requests/` | n/a — explainer, carries no numeric rows | _pending_ |
