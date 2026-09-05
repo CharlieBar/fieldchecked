@@ -287,11 +287,12 @@ baseline produced, recorded before anything was changed in response to it.
 | Drafts excluded by `noindex` | 10 |
 | Plausible visitors (28d) | 4, all direct |
 
-**The technical setup works.** That was the question the discovered-vs-indexed
-metric existed to answer early, and the answer is yes: indexing reached 11 pages
-on the day the sitemap was submitted, impressions started the following day, and
-individual pages hold positions of 5 and 8. For a three-week-old domain with no
-backlinks, nothing here points at a plumbing fault.
+**The mechanism works; the coverage does not yet.** Indexing reached 11 pages on
+the day the sitemap was submitted, impressions started the following day, and
+individual pages hold positions of 5 and 8 — so discovery, rendering, canonicals
+and the sitemap are all functioning. But see the indexing breakdown below before
+reading that as success: two thirds of the published articles have not been
+crawled at all.
 
 **Zero clicks is arithmetic, not a content signal.** Average position 17.7 is
 page two, where click-through runs well under one percent. Sixty-six impressions
@@ -300,13 +301,32 @@ outcome rather than evidence about the writing. This is the exact number that
 would have triggered a week-two rewrite if the no-intervention window had not
 been in place, and the rewrite would have been made against noise.
 
-**Indexing plateaued immediately.** Eleven pages on day one, unchanged for the
-following fifteen days, with seven URLs still at `Discovered - currently not
-indexed`. Fast pickup then a flat line is a different shape from slow crawling,
-and it is the one genuinely open question in this reading. A plausible reading is
-that the seven are hub pages whose listings are mostly draft content and are
-therefore thin, but that is a hypothesis and is recorded as one — it should be
-checked with URL Inspection before anything is changed on the strength of it.
+**Indexing plateaued immediately, and the plateau is misleading.** Eleven pages
+on day one, unchanged for fifteen days. The headline number flatters the site:
+
+| | |
+|---|---|
+| Indexed | 11 |
+| — of which hub and static pages | 9 |
+| — of which actual articles | **2** |
+| Published articles not indexed | **4 of 6** |
+
+The indexed set is `/`, `/about/` and seven pillar hubs, plus two blog posts.
+Every published guide, the published comparison, and one of three blog posts are
+absent.
+
+**A hypothesis recorded on 2026-09-05 was refuted the same day.** The first
+reading guessed that the seven unindexed URLs were thin hub pages whose listings
+are mostly drafts. The URL list says the opposite: the hubs are exactly what got
+indexed, and the articles are what did not. Recorded rather than quietly
+corrected, because a log that only preserves the guesses that survived is not
+evidence of anything.
+
+**The actual cause is visible in one column.** All seven show
+`Last crawled = N/A`. They have never been fetched — this is not an assessment
+of quality, it is a queue that has not been reached. On a three-week-old domain
+with no backlinks that is ordinary crawl scheduling, and it is a different
+problem from thin content with a different remedy.
 
 **The strongest signal is where the impressions landed.** `/benchmarks/` took 18
 impressions at position 11.7 while carrying no measured data at all, second only
@@ -319,6 +339,40 @@ argues for rig time above every other kind of work.
 **Search appearance is empty.** No rich results of any kind recorded. Too early
 and too low-authority to read as evidence about stacked schema, but it is the
 first data point in that series and it is not nothing.
+
+### Next intervention — request indexing on the four uncrawled articles
+
+The window closed on 09-03, so interventions are now in process rather than out
+of it. This is the first one, and it is deliberately the smallest thing that
+addresses the finding.
+
+Four published articles have never been crawled:
+
+- `/blog/quantization-tradeoffs-explained/`
+- `/guides/how-to-run-qwen3-locally/`
+- `/guides/multi-gpu-setup-for-local-ai/`
+- `/vs/ollama-vs-lm-studio/`
+
+**Action:** request indexing for each through URL Inspection, one at a time, and
+record the date. Then record days-to-index per URL.
+
+**Why this and not a content change.** The pages have not been assessed, so there
+is nothing yet to respond to. Rewriting a page Google has never fetched is
+changing a variable that has not been tested, and it would destroy the ability to
+attribute whatever happens next. Fetching is the missing step; supply that first,
+then read the result.
+
+**What this measures.** Time from manual index request to indexation, on a site
+whose ordinary crawl rate is currently zero for these URLs. That is a usable data
+point for every future page, and it feeds the publish-cadence question directly:
+if manual requests are what moves pages into the index at this authority level,
+cadence is bounded by attention rather than by writing throughput.
+
+**Also worth watching:** `/blog/` and `/vs/` hubs are themselves unindexed while
+the other seven hubs are indexed. If the two unindexed hubs are the ones whose
+listed articles are also unindexed, that suggests hub indexation and article
+indexation are moving together rather than independently — recorded as an
+observation to check next reading, not as a conclusion.
 
 ### Plausible: decision due before 2026-09-12
 
@@ -358,7 +412,7 @@ as an anomaly in the numbers.
 | Date | Discovered | Indexable (in sitemap) | Indexed | Notes |
 |---|---|---|---|---|
 | 2026-08-13 | 18 | 6 | 0 | Baseline. Sitemap read same-day, `Success, 18 discovered`. Indexed count starts at zero by definition. |
-| 2026-09-05 | 18 | 6 | **11** | 11 of 18 sitemap URLs indexed; the other 7 sit at `Discovered - currently not indexed`. Separately, 10 draft pages were found and correctly excluded by `noindex`. Indexing reached 11 on 08-13, the day of submission, and has not moved since — fast initial pickup, then a plateau. |
+| 2026-09-05 | 18 | 6 | **11** (of which only **2 are articles**) | 11 of 18 sitemap URLs indexed, but 9 of those 11 are hub and static pages. Only 2 of the 6 published articles are indexed. The other 7 URLs sit at `Discovered - currently not indexed` with **Last crawled = N/A** — never fetched, not assessed and rejected. Separately, 10 draft pages were found and correctly excluded by `noindex`. |
 
 **Why this is tracked from day one:** the lag between *discovered* and *indexed*
 is the cheapest early signal available and it starts producing data weeks before
