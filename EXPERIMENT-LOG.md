@@ -412,7 +412,8 @@ is an accepted trade — getting them indexed matters more here than attributing
 which lever did it. Recorded so the ambiguity is not discovered later and
 mistaken for a clean result.
 
-**Metric to watch:** days from 2026-09-05 to first crawl for each of the four,
+**Metric to watch:** days from **2026-09-09** — the deploy date, not the date the
+code was written — to first crawl for each of the four,
 and whether the count of `Discovered - currently not indexed` falls from 7.
 
 **Left alone deliberately:** hub pages still list their drafts, and the section
@@ -514,5 +515,5 @@ table is the publish-cadence-vs-indexing-speed experiment.
 
 | Date | URL | Rows moved to `measured` | Days to first GSC impression |
 |---|---|---|---|
-| 2026-09-05 | `/blog/github-actions-no-checks-on-bot-pull-requests/` | n/a — explainer, carries no numeric rows | _pending_ |
-| 2026-09-05 | `/blog/analytics-that-was-never-running/` | n/a — explainer, carries no numeric rows | _pending_ |
+| 2026-09-09 | `/blog/github-actions-no-checks-on-bot-pull-requests/` | n/a — explainer, carries no numeric rows | _pending_ |
+| 2026-09-09 | `/blog/analytics-that-was-never-running/` | n/a — explainer, carries no numeric rows | _pending_ |

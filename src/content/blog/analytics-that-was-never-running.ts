@@ -4,7 +4,7 @@ export const post: BlogContent = {
   slug: 'analytics-that-was-never-running',
   status: 'published',
   vertical: 'B',
-  datePublished: '2026-09-05',
+  datePublished: '2026-09-09',
   category: 'explainer',
   readingTimeMinutes: 6,
 
@@ -27,7 +27,7 @@ export const post: BlogContent = {
     headline: 'The Analytics That Was Never Running',
     subheadline:
       'Green builds, successful API writes, a correctly serving site, and zero events. Nothing in the chain reported a problem.',
-    lastUpdated: '2026-09-05',
+    lastUpdated: '2026-09-09',
   },
 
   quickAnswer:
