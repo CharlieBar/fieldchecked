@@ -204,7 +204,7 @@ Copy this row for each change:
 | 2026-08-12 | Canonical origin set to `https://fieldchecked.netlify.app`; brand and origin consolidated behind a single `BRAND` constant in `site.ts`, enforced by a CI guard. | A domain move later should be a one-line edit, not a grep-and-pray. | No functional metric — verified by the guard, which fails the build if either value is duplicated anywhere else. | n/a — structural |
 | 2026-08-12 | Publish cadence capped at 3 pages per release, enforced in CI (`scripts/lib/release-guards.mjs`). | A 12-URL index burst would make it impossible to attribute a ranking change to any single page, destroying the first experiment cycle. Staggered release doubles as the cadence-vs-indexing-speed test. | Time from merge to first impression, per page. With staggered releases this is measurable per URL; with a burst it is not. | _pending_ |
 | 2026-08-13 | Site deployed to Netlify (project `fieldchecked`) and verified in Search Console as a URL-prefix property on `https://fieldchecked.netlify.app/`. Ownership proved by HTML file (`public/google8d5146ff706a0f2a.html`), with the meta tag live as a second method. | No ranking hypothesis — this is the instrument, not an experiment. Until GSC is collecting, every later entry has no metric to read. | Impressions, clicks and indexed-page count begin accumulating from this date. The zero baseline is now genuinely captured rather than reconstructed. | Sitemap submitted and read the same day: **Success, 18 discovered** — matching the build exactly. Confirms in production that the 15 drafts are excluded structurally by `status`, not just in local builds. Day 0 for the promotion log's time-to-impression column. |
-| 2026-08-13 | Plausible analytics wired site-wide as plain `<script>` tags in `<head>` — not `next/script`, which would pull its own runtime into the bundle. Measured: per-route JS unchanged at 210 B, First Load unchanged at 106 kB. **Corrected 2026-08-13** to Plausible's current issued snippet: per-site script ID in the URL rather than shared `script.js` + `data-domain`, plus the inline init that buffers events fired before the async script lands. Env var renamed `PLAUSIBLE_DOMAIN` → `PLAUSIBLE_SCRIPT_ID`, since the domain is no longer passed to the script at all. JS bundle unchanged by the correction; page HTML grew 411 B. **Second correction 2026-08-13:** live view-source showed neither the analytics script nor the GSC meta tag was rendering in production — the Netlify env vars never reached the build, and nothing errored. Both values are public by construction, so both are now committed in `layout.tsx`, with analytics gated on Netlify's own `CONTEXT === 'production'` rather than on a variable someone has to set. Search Console verification was never at risk only because the HTML-file method is committed to the repo. | GSC and Plausible answer different halves of the same question and neither substitutes for the other. GSC covers everything up to the click — impressions, queries, position — and goes silent at the moment of arrival. Plausible covers everything after it. A page can win impressions and lose readers, or the reverse, and only both instruments together distinguish those. | Sessions, entry pages, and bounce/engagement per pillar, read against GSC impressions for the same URLs. | **Confirmed working end to end 2026-08-13.** Tags verified in live view-source, then first pageview confirmed landing in Plausible (1 visitor, 2 pageviews). Analytics and Search Console are both live, so the zero baseline is captured by both instruments from this date. |
+| 2026-08-13 | Plausible analytics wired site-wide as plain `<script>` tags in `<head>` — not `next/script`, which would pull its own runtime into the bundle. Measured: per-route JS unchanged at 210 B, First Load unchanged at 106 kB. **Corrected 2026-08-13** to Plausible's current issued snippet: per-site script ID in the URL rather than shared `script.js` + `data-domain`, plus the inline init that buffers events fired before the async script lands. Env var renamed `PLAUSIBLE_DOMAIN` → `PLAUSIBLE_SCRIPT_ID`, since the domain is no longer passed to the script at all. JS bundle unchanged by the correction; page HTML grew 411 B. **Second correction 2026-08-13:** live view-source showed neither the analytics script nor the GSC meta tag was rendering in production — the Netlify env vars never reached the build, and nothing errored. Both values are public by construction, so both are now committed in `layout.tsx`, with analytics gated on Netlify's own `CONTEXT === 'production'` rather than on a variable someone has to set. Search Console verification was never at risk only because the HTML-file method is committed to the repo. | GSC and Plausible answer different halves of the same question and neither substitutes for the other. GSC covers everything up to the click — impressions, queries, position — and goes silent at the moment of arrival. Plausible covers everything after it. A page can win impressions and lose readers, or the reverse, and only both instruments together distinguish those. | Sessions, entry pages, and bounce/engagement per pillar, read against GSC impressions for the same URLs. | **Confirmed working end to end 2026-08-13**, then **lapsed by decision 2026-09-12.** Tags verified in live view-source and first pageview confirmed landing. Over 28 days it recorded 4 visitors, all direct, zero organic — nothing post-click to measure, so the subscription was allowed to expire. Search Console continues alone. See the lapse decision below for the resubscribe trigger. |
 
 ### Hardware record correction — 2026-08-12
 
@@ -421,26 +421,44 @@ cards still count them. Drafts remain reachable and honestly labelled — the fi
 targets what the crawler is pointed at from the busiest page, not visibility of
 work in progress.
 
-### Plausible: decision due before 2026-09-12
+### Plausible: decision taken 2026-09-09 — let it lapse
 
-The trial lapses in seven days. The data now says what it is buying: **4 visitors
-in 28 days, every one of them direct, and zero organic clicks to measure the
-behaviour of.** Post-click analytics has nothing to observe while the click count
-is zero, and Search Console reports impressions and position for free
-indefinitely.
+**Decided: let the trial lapse.** Taken deliberately on 2026-09-09, three days
+before expiry, and recorded here as a decision rather than discovered later as a
+gap in the data.
 
-Recommendation is to **let it lapse and log the gap deliberately**, rather than
-pay to record zero. The tag stays in the codebase behind its existing production
-gate, so resuming is a subscription, not a code change.
+**What the data said.** 4 visitors in 28 days, every one direct, and **zero
+organic clicks**. Post-click analytics has nothing to observe while the click
+count is zero. Search Console continues to report impressions, queries and
+position for free and indefinitely, so the half of the question that is currently
+answerable stays answered.
 
-**Trigger to resubscribe:** the first organic click, or any page with real
-impressions reaching page one. Either means there is post-click behaviour worth
-measuring, and at that point the gap in continuity starts costing something.
+**What this costs.** Continuity. If organic traffic arrives during the gap, its
+first sessions are unrecorded and cannot be reconstructed — a lapsed account does
+not backfill. That cost is accepted because the gap currently contains nothing:
+the alternative was paying to record zero.
 
-This is a decision, not a foregone conclusion — it is recorded here either way,
-because discovering the account lapsed unnoticed is the outcome worth avoiding.
+**What stays in place.** The tag remains in `layout.tsx` behind its
+`CONTEXT === 'production'` gate. Resuming is a subscription, not a code change,
+so there is no engineering work standing between the trigger below and data
+flowing again. It also means the site keeps making one request per pageview to a
+service that is no longer recording — negligible at this traffic, worth removing
+if the lapse becomes long-term.
 
-### Calendar risk — Plausible trial ends ~2026-09-12
+**Trigger to resubscribe — check at every reading:**
+
+1. The first organic click in Search Console, or
+2. Any page with real impressions reaching page one.
+
+Either means post-click behaviour exists to measure, and from that moment the
+gap starts costing something real.
+
+**Why this is logged at all.** The log's own rule is that removals are
+experiments too. Taking an instrument out mid-experiment changes what later
+entries can say, and an unrecorded lapse would eventually surface as an
+unexplained flat stretch that somebody tries to interpret.
+
+### Calendar risk — Plausible trial ends ~2026-09-12 · RESOLVED 2026-09-09
 
 The Plausible account started on 2026-08-13 as a 30-day trial, so it lapses
 around **2026-09-12** — nine days *after* the no-intervention window closes,
@@ -450,9 +468,11 @@ during the first period that has any traffic in it.
 
 A gap here is not recoverable after the fact: unlike Search Console, which
 backfills nothing but keeps collecting regardless, a lapsed Plausible account
-simply stops recording. Decide on a plan before that date, or deliberately
-accept the gap and log it here as a decision rather than discovering it later
-as an anomaly in the numbers.
+simply stops recording.
+
+**Resolved 2026-09-09:** the gap was deliberately accepted. This risk did what it
+was written to do — it surfaced the deadline with three days to spare instead of
+turning into an unexplained flat stretch in the data. See the decision above.
 
 ### Discovered vs. indexed — recurring tracked metric
 
