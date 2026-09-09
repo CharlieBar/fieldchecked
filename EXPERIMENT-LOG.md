@@ -20,7 +20,7 @@ which changes moved anything and which were superstition.
 
 | Date | Change made | Hypothesis | Metric to watch | Result |
 |---|---|---|---|---|
-| 2026-08-12 | Site built and deployed. 18 seed pages across 6 pillars; 6 published, 12 draft/noindex pending fact-check. | Nothing yet — this establishes the zero baseline. | GSC impressions, clicks, indexed pages, average position. Expect flat for 2–4 weeks. | _pending_ |
+| 2026-08-12 | Site built and deployed. 18 seed pages across 6 pillars; 6 published, 12 draft/noindex pending fact-check. | Nothing yet — this establishes the zero baseline. | GSC impressions, clicks, indexed pages, average position. Expect flat for 2–4 weeks. | **Read 2026-09-05, window 08-13 to 09-03.** 66 impressions, 0 clicks, average position 17.7, 11 pages indexed. Not flat — impressions began the day after sitemap submission and ran continuously. Zero clicks is the arithmetic of page 2, not a content signal: 66 impressions at a page-2 CTR under 1% has an expected value below one click. |
 
 **Before the first post ships:** wire Google Search Console and analytics
 (GA4 or Plausible) so the zero baseline is genuinely captured. A baseline
@@ -199,8 +199,8 @@ Copy this row for each change:
 
 | Date | Change made | Hypothesis | Metric to watch | Result |
 |---|---|---|---|---|
-| 2026-08-12 | Seed content ships with 12 of 18 pages as `status: 'draft'` (noindex, excluded from sitemap) because their figures are placeholders pending rig verification. | Publishing unverified numbers would poison the site's only real asset. Withholding them costs indexation in the short term and costs nothing later. | Indexed page count should equal published page count, not total page count. Flip pages to published as Checkpoint 2 clears them. | _pending_ |
-| 2026-08-12 | Robots is permissive to AI crawlers. | Citation by AI assistants is the thing being measured; blocking the crawlers that produce citations would remove the variable. | Referral traffic and citation appearances from assistant surfaces. | _pending_ |
+| 2026-08-12 | Seed content ships with 12 of 18 pages as `status: 'draft'` (noindex, excluded from sitemap) because their figures are placeholders pending rig verification. | Publishing unverified numbers would poison the site's only real asset. Withholding them costs indexation in the short term and costs nothing later. | Indexed page count should equal published page count, not total page count. Flip pages to published as Checkpoint 2 clears them. | **CONFIRMED 2026-09-05.** Google found 10 of the draft pages and excluded every one of them under `Excluded by 'noindex' tag`. Zero drafts indexed. The structural exclusion — noindex plus sitemap omission, driven off the `status` field — is verified in production, not just in a local build. |
+| 2026-08-12 | Robots is permissive to AI crawlers. | Citation by AI assistants is the thing being measured; blocking the crawlers that produce citations would remove the variable. | Referral traffic and citation appearances from assistant surfaces. | _pending_ — no assistant referrals at 2026-09-05, which is uninformative while organic clicks are zero. Not readable until the site earns page-1 positions. |
 | 2026-08-12 | Canonical origin set to `https://fieldchecked.netlify.app`; brand and origin consolidated behind a single `BRAND` constant in `site.ts`, enforced by a CI guard. | A domain move later should be a one-line edit, not a grep-and-pray. | No functional metric — verified by the guard, which fails the build if either value is duplicated anywhere else. | n/a — structural |
 | 2026-08-12 | Publish cadence capped at 3 pages per release, enforced in CI (`scripts/lib/release-guards.mjs`). | A 12-URL index burst would make it impossible to attribute a ranking change to any single page, destroying the first experiment cycle. Staggered release doubles as the cadence-vs-indexing-speed test. | Time from merge to first impression, per page. With staggered releases this is measurable per URL; with a burst it is not. | _pending_ |
 | 2026-08-13 | Site deployed to Netlify (project `fieldchecked`) and verified in Search Console as a URL-prefix property on `https://fieldchecked.netlify.app/`. Ownership proved by HTML file (`public/google8d5146ff706a0f2a.html`), with the meta tag live as a second method. | No ranking hypothesis — this is the instrument, not an experiment. Until GSC is collecting, every later entry has no metric to read. | Impressions, clicks and indexed-page count begin accumulating from this date. The zero baseline is now genuinely captured rather than reconstructed. | Sitemap submitted and read the same day: **Success, 18 discovered** — matching the build exactly. Confirms in production that the 15 drafts are excluded structurally by `status`, not just in local builds. Day 0 for the promotion log's time-to-impression column. |
@@ -272,6 +272,174 @@ The one exception is a genuine defect — a page 404ing, a canonical pointing at
 the wrong origin, a validator failure reaching production. Fixing breakage is
 not an intervention. Improving performance is.
 
+### First reading — 2026-09-05
+
+The no-intervention window closed on 09-03. This is what 23 days of a clean
+baseline produced, recorded before anything was changed in response to it.
+
+| Metric | Value |
+|---|---|
+| Impressions | 66 |
+| Clicks | 0 |
+| Average position | 17.7 |
+| Indexed | 11 of 18 sitemap URLs |
+| Discovered, not indexed | 7 |
+| Drafts excluded by `noindex` | 10 |
+| Plausible visitors (28d) | 4, all direct |
+
+**The mechanism works; the coverage does not yet.** Indexing reached 11 pages on
+the day the sitemap was submitted, impressions started the following day, and
+individual pages hold positions of 5 and 8 — so discovery, rendering, canonicals
+and the sitemap are all functioning. But see the indexing breakdown below before
+reading that as success: two thirds of the published articles have not been
+crawled at all.
+
+**Zero clicks is arithmetic, not a content signal.** Average position 17.7 is
+page two, where click-through runs well under one percent. Sixty-six impressions
+at that rate has an expected value below a single click, so zero is the ordinary
+outcome rather than evidence about the writing. This is the exact number that
+would have triggered a week-two rewrite if the no-intervention window had not
+been in place, and the rewrite would have been made against noise.
+
+**Indexing plateaued immediately, and the plateau is misleading.** Eleven pages
+on day one, unchanged for fifteen days. The headline number flatters the site:
+
+| | |
+|---|---|
+| Indexed | 11 |
+| — of which hub and static pages | 9 |
+| — of which actual articles | **2** |
+| Published articles not indexed | **4 of 6** |
+
+The indexed set is `/`, `/about/` and seven pillar hubs, plus two blog posts.
+Every published guide, the published comparison, and one of three blog posts are
+absent.
+
+**A hypothesis recorded on 2026-09-05 was refuted the same day.** The first
+reading guessed that the seven unindexed URLs were thin hub pages whose listings
+are mostly drafts. The URL list says the opposite: the hubs are exactly what got
+indexed, and the articles are what did not. Recorded rather than quietly
+corrected, because a log that only preserves the guesses that survived is not
+evidence of anything.
+
+**The actual cause is visible in one column.** All seven show
+`Last crawled = N/A`. They have never been fetched — this is not an assessment
+of quality, it is a queue that has not been reached. On a three-week-old domain
+with no backlinks that is ordinary crawl scheduling, and it is a different
+problem from thin content with a different remedy.
+
+**The strongest signal is where the impressions landed.** `/benchmarks/` took 18
+impressions at position 11.7 while carrying no measured data at all, second only
+to a published blog post. One of the three named queries was
+`qwen3.8-27b dgx spark tokens per second`, at position 5 — a model-plus-hardware
+throughput query, which is precisely the shape the benchmark pillar was built
+for. Demand for that query class is now observed rather than assumed, and it
+argues for rig time above every other kind of work.
+
+**Search appearance is empty.** No rich results of any kind recorded. Too early
+and too low-authority to read as evidence about stacked schema, but it is the
+first data point in that series and it is not nothing.
+
+### Next intervention — request indexing on the four uncrawled articles
+
+The window closed on 09-03, so interventions are now in process rather than out
+of it. This is the first one, and it is deliberately the smallest thing that
+addresses the finding.
+
+Four published articles have never been crawled:
+
+- `/blog/quantization-tradeoffs-explained/`
+- `/guides/how-to-run-qwen3-locally/`
+- `/guides/multi-gpu-setup-for-local-ai/`
+- `/vs/ollama-vs-lm-studio/`
+
+**Action:** request indexing for each through URL Inspection, one at a time, and
+record the date. Then record days-to-index per URL.
+
+**Why this and not a content change.** The pages have not been assessed, so there
+is nothing yet to respond to. Rewriting a page Google has never fetched is
+changing a variable that has not been tested, and it would destroy the ability to
+attribute whatever happens next. Fetching is the missing step; supply that first,
+then read the result.
+
+**What this measures.** Time from manual index request to indexation, on a site
+whose ordinary crawl rate is currently zero for these URLs. That is a usable data
+point for every future page, and it feeds the publish-cadence question directly:
+if manual requests are what moves pages into the index at this authority level,
+cadence is bounded by attention rather than by writing throughput.
+
+**Also worth watching:** `/blog/` and `/vs/` hubs are themselves unindexed while
+the other seven hubs are indexed. If the two unindexed hubs are the ones whose
+listed articles are also unindexed, that suggests hub indexation and article
+indexation are moving together rather than independently — recorded as an
+observation to check next reading, not as a conclusion.
+
+### Intervention 1 — homepage stops promoting drafts (2026-09-05)
+
+**What changed.** `src/app/page.tsx` selected from `allContent()`, which includes
+drafts. It now selects from `publishedContent()`. Four leaks closed in one edit:
+the featured card, the latest grid, the ItemList structured data, and a hero CTA
+hardcoded to a draft buying guide (now derived from the hubs map, so the design
+layer holds no content references). The featured-dataset section now requires a
+published benchmark and therefore does not render at all — the honest state,
+since no benchmark is verified yet.
+
+The latest grid went from six to nine so that every published page is one click
+from the homepage while the published set is this small.
+
+**Before and after, homepage article links:**
+
+| | Before | After |
+|---|---|---|
+| Links to draft pages | 5 | **0** |
+| Links to published pages | 2 | **8** |
+| Draft URLs in ItemList JSON-LD | yes | **none** |
+| Never-crawled pages linked | 0 of 4 | **4 of 4** |
+
+**Why, and why this rather than a content change.** The homepage is the most
+crawled page on the site. For three weeks it spent that attention on pages
+carrying `noindex`: Google fetched ten drafts, hit the tag on every one, and
+never fetched four of the six published articles at all. Those four were absent
+from the homepage entirely. This is a plumbing fix — no content file was touched,
+and no page Google has never assessed was rewritten.
+
+**Hypothesis.** Redirecting internal links from unindexable to indexable pages
+shortens time-to-crawl for the four, independently of the manual index requests.
+
+**Confound to declare now:** manual index requests are being made in the same
+window, so if the four are crawled soon the two causes cannot be separated. That
+is an accepted trade — getting them indexed matters more here than attributing
+which lever did it. Recorded so the ambiguity is not discovered later and
+mistaken for a clean result.
+
+**Metric to watch:** days from **2026-09-09** — the deploy date, not the date the
+code was written — to first crawl for each of the four,
+and whether the count of `Discovered - currently not indexed` falls from 7.
+
+**Left alone deliberately:** hub pages still list their drafts, and the section
+cards still count them. Drafts remain reachable and honestly labelled — the fix
+targets what the crawler is pointed at from the busiest page, not visibility of
+work in progress.
+
+### Plausible: decision due before 2026-09-12
+
+The trial lapses in seven days. The data now says what it is buying: **4 visitors
+in 28 days, every one of them direct, and zero organic clicks to measure the
+behaviour of.** Post-click analytics has nothing to observe while the click count
+is zero, and Search Console reports impressions and position for free
+indefinitely.
+
+Recommendation is to **let it lapse and log the gap deliberately**, rather than
+pay to record zero. The tag stays in the codebase behind its existing production
+gate, so resuming is a subscription, not a code change.
+
+**Trigger to resubscribe:** the first organic click, or any page with real
+impressions reaching page one. Either means there is post-click behaviour worth
+measuring, and at that point the gap in continuity starts costing something.
+
+This is a decision, not a foregone conclusion — it is recorded here either way,
+because discovering the account lapsed unnoticed is the outcome worth avoiding.
+
 ### Calendar risk — Plausible trial ends ~2026-09-12
 
 The Plausible account started on 2026-08-13 as a 30-day trial, so it lapses
@@ -291,6 +459,7 @@ as an anomaly in the numbers.
 | Date | Discovered | Indexable (in sitemap) | Indexed | Notes |
 |---|---|---|---|---|
 | 2026-08-13 | 18 | 6 | 0 | Baseline. Sitemap read same-day, `Success, 18 discovered`. Indexed count starts at zero by definition. |
+| 2026-09-05 | 18 | 6 | **11** (of which only **2 are articles**) | 11 of 18 sitemap URLs indexed, but 9 of those 11 are hub and static pages. Only 2 of the 6 published articles are indexed. The other 7 URLs sit at `Discovered - currently not indexed` with **Last crawled = N/A** — never fetched, not assessed and rejected. Separately, 10 draft pages were found and correctly excluded by `noindex`. |
 
 **Why this is tracked from day one:** the lag between *discovered* and *indexed*
 is the cheapest early signal available and it starts producing data weeks before
@@ -346,4 +515,5 @@ table is the publish-cadence-vs-indexing-speed experiment.
 
 | Date | URL | Rows moved to `measured` | Days to first GSC impression |
 |---|---|---|---|
-| _(none yet — the 6 pages live at launch were never drafts)_ | | | |
+| 2026-09-09 | `/blog/github-actions-no-checks-on-bot-pull-requests/` | n/a — explainer, carries no numeric rows | _pending_ |
+| 2026-09-09 | `/blog/analytics-that-was-never-running/` | n/a — explainer, carries no numeric rows | _pending_ |

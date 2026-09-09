@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { JsonLd } from '@/components/JsonLd';
 import { BenchmarkTicker, ContentCard } from '@/components/listing';
 import { BenchmarkTable } from '@/components/tables';
-import { allBenchmarkRows, allContent, benchmarks, collections } from '@/content';
+import { allBenchmarkRows, benchmarks, collections, publishedContent } from '@/content';
 import { site } from '@/content/global/site';
 import { hubs, type HubKey } from '@/lib/content';
 import { buildSiteSchema } from '@/lib/schema';
@@ -28,10 +28,33 @@ function hubKeyFor(canonical: string): HubKey {
 }
 
 export default function HomePage() {
-  const everything = allContent();
+  /*
+   * Published only, deliberately — this used to read allContent().
+   *
+   * Search Console showed the consequence: in the first three weeks Google
+   * crawled ten draft pages, hit `noindex` on every one, and never fetched four
+   * of the six published articles at all. The homepage is the most-crawled page
+   * on the site, and it was spending that attention on pages that can never be
+   * indexed while the ones that could be were absent from it.
+   *
+   * Drafts are still reachable and still listed on their own hub pages; they are
+   * simply no longer promoted from the one page the crawler visits most.
+   */
+  const everything = publishedContent();
   const [featured, ...rest] = everything;
-  const latest = rest.slice(0, 6);
-  const featuredDataset = benchmarks[0];
+  /*
+   * Nine rather than six: while the published set is this small, every
+   * published page should be one click from the homepage — that is the whole
+   * point of the change above, and leaving the oldest one unlinked would
+   * reintroduce the gap for exactly the page least likely to be crawled.
+   * Three rows of three; drop it back once the published set outgrows the grid.
+   */
+  const latest = rest.slice(0, 9);
+
+  // Same rule for the featured dataset. With no benchmark verified yet this is
+  // undefined and the section does not render, which is the honest state: the
+  // homepage should not headline a table whose every row is pending.
+  const featuredDataset = benchmarks.find((entry) => entry.status === 'published');
 
   return (
     <>
@@ -62,8 +85,14 @@ export default function HomePage() {
             >
               Browse the dataset
             </Link>
+            {/*
+              * Points at the hub, not the buying guide: that guide is still a
+              * draft, and a prominent CTA into a noindex page was part of the
+              * same crawl leak. Derived from `hubs` rather than hardcoding a
+              * slug here, so the design layer holds no content references.
+              */}
             <Link
-              href="/guides/best-gpu-for-local-llm-inference-2026/"
+              href={hubs.guides.path}
               className="rounded border border-border px-5 py-2.5 font-display text-sm transition-colors hover:border-primary/60"
             >
               Which GPU should I buy?
