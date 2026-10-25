@@ -60,6 +60,7 @@ import { post as tokensPerSecondAlone } from './blog/tokens-per-second-is-not-en
 import { post as quantizationTradeoffs } from './blog/quantization-tradeoffs-explained';
 import { post as botPrNoChecks } from './blog/github-actions-no-checks-on-bot-pull-requests';
 import { post as analyticsNeverRunning } from './blog/analytics-that-was-never-running';
+import { post as comfyuiSlowNodeList } from './blog/comfyui-slow-node-list-object-info';
 
 export const reviews: ReviewContent[] = [
   rtx4080SuperLocalLlm,
@@ -101,6 +102,7 @@ export const posts: BlogContent[] = [
   quantizationTradeoffs,
   botPrNoChecks,
   analyticsNeverRunning,
+  comfyuiSlowNodeList,
 ];
 
 /* ------------------------------------------------------------------ */
