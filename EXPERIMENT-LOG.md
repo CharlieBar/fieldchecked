@@ -180,6 +180,53 @@ The retained version is news as an angle on firsthand testing — a release is t
 hook, a measurement on owned hardware is the payload — which keeps the timeliness
 without spending the brand on it.
 
+### Focus shift — 2026-10-25: ComfyUI and local open-source image/video models
+
+**Decided by the site owner:** content work focuses on ComfyUI and local
+open-source image and video models for now. The LLM verification queue above
+(#1–#12) is **paused, not reordered**. When it resumes, it resumes in the same
+order. None of #1–#12 was publishable on this date anyway: #2–#6 and #10–#12
+carry pending rows, #7–#9 cite landing pages, and #1 has editorial defects (its
+ItemList points "used 24GB card" at the 4070 Ti Super review).
+
+**Source.** A data pack the owner measured on the RTX 4070 Ti Super 16GB
+between 2026-09-24 and 2026-10-23. Raw notes, scripts and outputs live on the
+owner's machine, not in this repo. Mostly one seed, one machine, small n — every
+page says so.
+
+**Placement rule.** Split by what the page measures, not by subject:
+
+- "How fast does X run on this card" → Vertical A, as `/guides/` tagged A. Not
+  `/benchmarks/`, so that pattern stays a clean LLM-throughput series.
+- "Does this workflow produce usable output" → Vertical B, as `/studio/` or
+  `/blog/` tagged B. Not `/experiments/`, which stays SEO-test-only.
+
+No new vertical: it would need a contract change, new URL patterns and new GSC
+properties, and would add a third attribution bucket with zero history.
+
+**Open contract decision.** `BenchmarkRow` requires `tokensPerSec`, and table
+cells carry no provenance. Seconds per image, VRAM, SSIM and identity scores have
+no typed home, and the throughput guard only matches tok/s, so "22 s" in a table
+would pass unchecked. Proposed: one generation-metric row type with a
+`BenchmarkStatus`. Not implemented — this needs the owner's decision.
+
+**Confound to declare.** These pages differ in topic and query shape from
+everything published before them. Any change in crawl or indexing pace after the
+first one ships cannot be attributed to cadence alone.
+
+**Gate.** No draft from this queue merges to `main` until the reading for the
+2026-09-09 homepage fix is recorded (days to first crawl for the four pages, and
+the `Discovered - currently not indexed` count, which was 7). Drafts on hub pages
+compete for the same crawl being measured.
+
+| # | Page | Vertical | Target query | Blocked on |
+|---|---|---|---|---|
+| C1 | `/blog/comfyui-slow-node-list-object-info/` | B | comfyui slow to load nodes | **drafted 2026-10-25.** CPU/RAM/disk; which build showed which finding; the fixes for the input-folder scan and the websocket monitor |
+| C2 | int8 vs GGUF vs fp8 on 16 GB (Qwen Image 2.1, FIBO Edit) | A | qwen image gguf vs int8 | contract decision; n per comparison; peak VRAM and offload status per format |
+| C3 | Text in images: MOSS-Image vs Qwen Image 2.1 | B (`/studio/`) | best local model for text in images | client-free samples under `/public`; prompt template; ComfyUI build per run (the date range straddles 10-17) |
+| C4 | MiniMax H3 speed on 16 GB | A | minimax h3 16gb vram | contract decision; more than one seed; peak VRAM; source of the 12,288-token SLA floor |
+| C5 | LTX-2.5 can't hold a face mid-clip | B | ltx 2.5 character consistency | an H3 identity score to back "H3 won"; frame-sampling method; clip count |
+
 ### Practical sequencing note
 
 Intent order says publish #1–#3 first, but #1–#3 restate measurements that live
