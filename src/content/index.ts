@@ -48,6 +48,7 @@ import { build as wordpressMcpServer } from './builds/wordpress-mcp-server-claud
 
 /* -- studio (Vertical B) ------------------------------------------- */
 import { studio as comfyuiInfographic } from './studio/comfyui-infographic-pipeline';
+import { studio as mossVsQwenText } from './studio/moss-image-vs-qwen-image-text-rendering';
 
 /* -- experiments (Vertical B) -------------------------------------- */
 import { experiment as faqSchemaCitations } from './experiments/faq-schema-ai-citations';
@@ -61,6 +62,7 @@ import { post as quantizationTradeoffs } from './blog/quantization-tradeoffs-exp
 import { post as botPrNoChecks } from './blog/github-actions-no-checks-on-bot-pull-requests';
 import { post as analyticsNeverRunning } from './blog/analytics-that-was-never-running';
 import { post as comfyuiSlowNodeList } from './blog/comfyui-slow-node-list-object-info';
+import { post as ltxFaceConsistency } from './blog/ltx-2-5-character-face-consistency';
 
 export const reviews: ReviewContent[] = [
   rtx4080SuperLocalLlm,
@@ -89,7 +91,7 @@ export const verdicts: VerdictContent[] = [
 ];
 
 export const builds: BuildContent[] = [wordpressMcpServer];
-export const studioPipelines: StudioContent[] = [comfyuiInfographic];
+export const studioPipelines: StudioContent[] = [comfyuiInfographic, mossVsQwenText];
 export const experiments: ExperimentContent[] = [
   faqSchemaCitations,
   agentsSameTask,
@@ -103,6 +105,7 @@ export const posts: BlogContent[] = [
   botPrNoChecks,
   analyticsNeverRunning,
   comfyuiSlowNodeList,
+  ltxFaceConsistency,
 ];
 
 /* ------------------------------------------------------------------ */
