@@ -214,6 +214,19 @@ would pass unchecked. Proposed: one generation-metric row type with a
 everything published before them. Any change in crawl or indexing pace after the
 first one ships cannot be attributed to cadence alone.
 
+**Declared variable: these target trending queries.** The owner chose this queue
+partly because the models are trending now. Trending queries have different
+demand and decay curves from the evergreen hardware queries the site launched
+with, so readings on these pages are not comparable with the earlier pages
+without noting it. This is the retained form of news from the rejected news
+section: a release is the hook, a measurement on owned hardware is the payload.
+Timeliness is now a cost of every gate, which is a reason to clear the gates
+quickly, not to skip them.
+
+The C3 data partly contradicts the `/studio/comfyui-infographic-pipeline/`
+draft, which says diffusion-rendered text is unreliable enough that every caption
+must be composited. Reconcile that draft before either one publishes.
+
 **Gate.** No draft from this queue merges to `main` until the reading for the
 2026-09-09 homepage fix is recorded (days to first crawl for the four pages, and
 the `Discovered - currently not indexed` count, which was 7). Drafts on hub pages
@@ -223,9 +236,9 @@ compete for the same crawl being measured.
 |---|---|---|---|---|
 | C1 | `/blog/comfyui-slow-node-list-object-info/` | B | comfyui slow to load nodes | **drafted 2026-10-25.** CPU/RAM/disk; which build showed which finding; the fixes for the input-folder scan and the websocket monitor |
 | C2 | int8 vs GGUF vs fp8 on 16 GB (Qwen Image 2.1, FIBO Edit) | A | qwen image gguf vs int8 | contract decision; n per comparison; peak VRAM and offload status per format |
-| C3 | Text in images: MOSS-Image vs Qwen Image 2.1 | B (`/studio/`) | best local model for text in images | client-free samples under `/public`; prompt template; ComfyUI build per run (the date range straddles 10-17) |
+| C3 | `/studio/moss-image-vs-qwen-image-text-rendering/` | B | best local model for text in images | **drafted 2026-10-25.** Two client-free samples under `/public` (the validator blocks publish without them); model files; ComfyUI build per run (the date range straddles 10-17) |
 | C4 | MiniMax H3 speed on 16 GB | A | minimax h3 16gb vram | contract decision; more than one seed; peak VRAM; source of the 12,288-token SLA floor |
-| C5 | LTX-2.5 can't hold a face mid-clip | B | ltx 2.5 character consistency | an H3 identity score to back "H3 won"; frame-sampling method; clip count |
+| C5 | `/blog/ltx-2-5-character-face-consistency/` | B | ltx 2.5 character consistency | **drafted 2026-10-25.** An H3 identity score to back "H3 won" (stated on the page as an observation until then); model file; frame-sampling method; clip count |
 
 ### Practical sequencing note
 
